@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>亞東科大 校園探索大冒險 🎮</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC','Nunito',sans-serif;background:#1a1a2e;min-height:100vh;overflow-x:hidden;color:#2d3748}
+
+/* BG */
+.bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e)}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;animation:orbFloat 8s ease-in-out infinite}
+.orb1{width:500px;height:500px;background:#667eea;top:-10%;left:-10%}
+.orb2{width:400px;height:400px;background:#f093fb;top:30%;right:-8%;animation-delay:-3s}
+.orb3{width:350px;height:350px;background:#4facfe;bottom:-5%;left:20%;animation-delay:-5s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.05)}66%{transform:translate(-20px,30px) scale(.95)}}
+.floater{position:fixed;font-size:1.8rem;opacity:0;pointer-events:none;z-index:0;animation:floatUp 10s ease-in infinite}
+@keyframes floatUp{0%{transform:translateY(100vh) rotate(0);opacity:0}10%,90%{opacity:.15}100%{transform:translateY(-10vh) rotate(360deg);opacity:0}}
+
+/* SCREENS */
+.screen{display:none;position:relative;z-index:1;min-height:100vh;padding:20px}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+/* GLASS */
+.glass{background:rgba(255,255,255,.96);border-radius:28px;box-shadow:0 24px 80px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.8);width:100%;max-width:900px;overflow:visible;animation:popIn .5s cubic-bezier(.175,.885,.32,1.275) both}
+@keyframes popIn{from{transform:scale(.82) translateY(30px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+
+/* ── WELCOME ── */
+.welcome-header{background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);padding:32px 32px 24px;text-align:center;position:relative;overflow:hidden}
+.welcome-header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='4' fill='white' fill-opacity='.06'/%3E%3C/svg%3E")}
+.school-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.25);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.4);color:white;font-size:.85rem;font-weight:800;padding:7px 20px;border-radius:50px;letter-spacing:1px;margin-bottom:12px}
+.welcome-title{font-size:clamp(1.7rem,5vw,2.5rem);font-weight:900;color:white;text-shadow:0 2px 20px rgba(0,0,0,.2);line-height:1.2;margin-bottom:6px}
+.welcome-sub{color:rgba(255,255,255,.85);font-size:.95rem;font-weight:500}
+.welcome-body{padding:24px 28px 28px}
+.step-label{display:flex;align-items:center;gap:10px;font-size:.73rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#a0aec0;margin-bottom:12px}
+.step-label::after{content:'';flex:1;height:1px;background:#e2e8f0}
+
+/* ── COLLEGE PICK (replaces persona) ── */
+.college-pick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+@media(min-width:600px){.college-pick-grid{grid-template-columns:repeat(4,1fr)}}
+.cp-card{border:2.5px solid #e2e8f0;border-radius:18px;padding:18px 10px;text-align:center;cursor:pointer;transition:all .25s cubic-bezier(.175,.885,.32,1.275);background:#fafafa;user-select:none}
+.cp-card:hover{transform:translateY(-4px)}
+.cp-card.selected{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.cp-icon{font-size:2.4rem;display:block;margin-bottom:7px;transition:transform .3s}
+.cp-card.selected .cp-icon{transform:scale(1.15)}
+.cp-name{font-weight:900;font-size:.95rem;margin-bottom:3px}
+.cp-dept-list{font-size:.68rem;color:#718096;line-height:1.5}
+/* college colours */
+.cp-e{border-color:#4A90E2}.cp-e.selected{border-color:#4A90E2;background:linear-gradient(135deg,#ebf5fb,#dbeeff);box-shadow:0 8px 24px rgba(74,144,226,.25)}
+.cp-e .cp-name{color:#1a6db5}
+.cp-g{border-color:#27AE60}.cp-g.selected{border-color:#27AE60;background:linear-gradient(135deg,#eafaf1,#d5f5e3);box-shadow:0 8px 24px rgba(39,174,96,.25)}
+.cp-g .cp-name{color:#1a7a44}
+.cp-m{border-color:#E74C3C}.cp-m.selected{border-color:#E74C3C;background:linear-gradient(135deg,#fdedec,#fdd0cc);box-shadow:0 8px 24px rgba(231,76,60,.25)}
+.cp-m .cp-name{color:#b02a1b}
+.cp-t{border-color:#F39C12}.cp-t.selected{border-color:#F39C12;background:linear-gradient(135deg,#fef9e7,#fdefc3);box-shadow:0 8px 24px rgba(243,156,18,.25)}
+.cp-t .cp-name{color:#b8720c}
+
+/* ── MODE PICK ── */
+.mode-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+@media(min-width:500px){.mode-grid{grid-template-columns:repeat(4,1fr)}}
+.mode-card{border:2.5px solid #e2e8f0;border-radius:16px;padding:16px 8px;text-align:center;cursor:pointer;transition:all .25s cubic-bezier(.175,.885,.32,1.275);background:#fafafa;user-select:none}
+.mode-card:hover{transform:translateY(-3px);border-color:#667eea;background:#f0f4ff}
+.mode-card.selected{border-color:#667eea;background:linear-gradient(135deg,#f0f4ff,#faf0ff);box-shadow:0 6px 20px rgba(102,126,234,.25);transform:translateY(-3px)}
+.mode-icon{font-size:2rem;display:block;margin-bottom:6px}
+.mode-name{font-weight:900;font-size:.9rem;color:#2d3748;margin-bottom:2px}
+.mode-desc{font-size:.68rem;color:#718096;line-height:1.3}
+
+.info-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.info-pill{display:flex;align-items:center;gap:6px;background:#f7fafc;border:1.5px solid #e2e8f0;border-radius:50px;padding:5px 12px;font-size:.76rem;font-weight:600;color:#4a5568}
+.btn-start{width:100%;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:14px;padding:15px 40px;font-size:1.1rem;font-weight:900;cursor:pointer;transition:all .2s;font-family:'Noto Sans TC',sans-serif;box-shadow:0 8px 28px rgba(102,126,234,.45)}
+.btn-start:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 36px rgba(102,126,234,.55)}
+.btn-start:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── GAME SCREEN ── */
+/* CSS 變數：由 JS 動態計算後寫入，確保所有牌都在螢幕內 */
+:root{
+  --card-size: 60px;      /* 每張牌邊長，JS 計算後覆寫 */
+  --card-gap:  5px;       /* 牌間距 */
+  --card-cols: 6;         /* 欄數，直式6 / 橫式4 */
+  --card-rows: 4;         /* 列數，直式4 / 橫式6 */
+  --card-emoji: 1.1rem;   /* emoji 大小，由 JS 依 card-size 推算 */
+  --card-text:  .55rem;   /* 系名文字，由 JS 依 card-size 推算 */
+}
+
+#screen-game{padding:8px}
+#screen-game .glass{
+  max-width:1400px;
+  max-height:calc(100vh - 16px);
+  display:flex;
+  flex-direction:column;
+  /* clip 防止溢出但不破壞 3D transform context */
+  overflow:clip;
+}
+.game-topbar{
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  padding:9px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;flex-wrap:wrap;gap:6px;
+}
+.game-logo{font-size:.88rem;font-weight:900;color:white}
+.topbar-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.stat-chip{
+  background:rgba(255,255,255,.2);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.3);color:white;
+  font-size:.72rem;font-weight:800;padding:3px 9px;border-radius:50px;
+}
+.stat-chip span{opacity:.75;font-weight:600}
+.sound-btn{
+  background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);
+  color:white;font-size:.78rem;font-weight:800;padding:3px 9px;
+  border-radius:50px;cursor:pointer;transition:all .2s;user-select:none;
+}
+.sound-btn:hover{background:rgba(255,255,255,.35)}
+.sound-btn.muted{opacity:.5}
+
+/* ══ GAME BODY ══════════════════════════════════ */
+.game-body{
+  padding:10px 12px 8px;
+  flex:1;display:flex;flex-direction:column;
+  overflow:clip;  /* clip 不破壞子元素 3D transform */
+  min-height:0;
+}
+
+/* 進度條：全寬，兩種版面都在最頂 */
+.progress-wrap{flex-shrink:0;margin-bottom:7px}
+.progress-meta{display:flex;justify-content:space-between;font-size:.7rem;font-weight:700;color:#718096;margin-bottom:3px}
+.progress-track{background:#e2e8f0;border-radius:50px;height:7px;overflow:hidden}
+.progress-bar{height:100%;border-radius:50px;background:linear-gradient(90deg,#4A90E2,#27AE60,#E74C3C,#F39C12);background-size:300% 100%;transition:width .6s cubic-bezier(.4,0,.2,1);animation:shimmer 3s linear infinite}
+@keyframes shimmer{0%{background-position:300% 0}100%{background-position:-300% 0}}
+
+/* 多人計分板 */
+.mp-scores{display:flex;gap:6px;flex-shrink:0;margin-bottom:7px;flex-wrap:wrap}
+.mp-player{
+  flex:1;min-width:80px;border-radius:10px;padding:6px 8px;
+  border:2px solid;text-align:center;transition:all .22s;
+  position:relative;overflow:hidden;
+}
+.mp-player.active-turn{transform:scale(1.05);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.mp-player.active-turn::after{content:'▶';font-size:.55rem;font-weight:900;position:absolute;top:3px;right:5px;opacity:.8}
+.mp-p0{border-color:#667eea;background:#f0f4ff}.mp-p0 .mp-pname{color:#667eea}
+.mp-p1{border-color:#e74c3c;background:#fff0f0}.mp-p1 .mp-pname{color:#e74c3c}
+.mp-p2{border-color:#27ae60;background:#f0fff4}.mp-p2 .mp-pname{color:#27ae60}
+.mp-p3{border-color:#f39c12;background:#fffbf0}.mp-p3 .mp-pname{color:#f39c12}
+.mp-player.active-turn.mp-p0{background:linear-gradient(135deg,#dde5ff,#f0f4ff);border-color:#4454cc}
+.mp-player.active-turn.mp-p1{background:linear-gradient(135deg,#ffd0d0,#fff0f0);border-color:#c0392b}
+.mp-player.active-turn.mp-p2{background:linear-gradient(135deg,#c8f5dc,#f0fff4);border-color:#1a7a44}
+.mp-player.active-turn.mp-p3{background:linear-gradient(135deg,#feecc8,#fffbf0);border-color:#c87f10}
+.mp-avatar{font-size:1.2rem;margin-bottom:1px;line-height:1}
+.mp-pname{font-weight:900;font-size:.7rem;margin-bottom:1px}
+.mp-score{font-size:1.25rem;font-weight:900;color:#2d3748;line-height:1}
+.mp-score-lab{font-size:.55rem;color:#a0aec0;font-weight:700}
+.mp-streak{font-size:.55rem;font-weight:800;color:#ff9f43;min-height:.8rem}
+
+/* 學院分頁標籤 */
+.college-tabs{display:flex;gap:5px;flex-shrink:0;margin-bottom:7px;flex-wrap:wrap}
+.ctab{padding:3px 9px;border-radius:50px;font-size:.68rem;font-weight:800;border:2px solid;cursor:default;transition:all .28s;white-space:nowrap}
+.ctab-e{border-color:#4A90E2;color:#4A90E2;background:#EBF5FB}
+.ctab-g{border-color:#27AE60;color:#27AE60;background:#EAFAF1}
+.ctab-m{border-color:#E74C3C;color:#E74C3C;background:#FDEDEC}
+.ctab-t{border-color:#F39C12;color:#F39C12;background:#FEF9E7}
+.ctab.locked{opacity:.22;filter:grayscale(.6)}
+.ctab.done.ctab-e{background:#4A90E2;color:white;box-shadow:0 2px 7px rgba(74,144,226,.35)}
+.ctab.done.ctab-g{background:#27AE60;color:white;box-shadow:0 2px 7px rgba(39,174,96,.35)}
+.ctab.done.ctab-m{background:#E74C3C;color:white;box-shadow:0 2px 7px rgba(231,76,60,.35)}
+.ctab.done.ctab-t{background:#F39C12;color:white;box-shadow:0 2px 7px rgba(243,156,18,.35)}
+
+/* ══ 主內容區：牌盤 + 校園欄 ══════════════════════
+   直式（預設）：
+     game-layout = flex-column
+     campus-wrap（含標籤+校園+放棄）在下，board-col 在上
+   橫式：
+     game-layout = flex-row
+     campus-wrap 在左 1/3，board-col 在右 2/3
+     campus-wrap 內部垂直排列，所有元素都可見
+═══════════════════════════════════════════════ */
+.game-layout{
+  flex:1;display:flex;flex-direction:column;
+  gap:8px;min-height:0;
+}
+
+/* 直式：牌盤上（order:1）、campus-wrap 下（order:2） */
+#board-col   { order:1; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.campus-wrap { order:2; display:flex; flex-direction:column; min-width:0; width:100%; }
+
+/* 橫式：左右並排，campus-wrap 左（order:1）、牌盤右（order:2） */
+body.landscape .game-layout{
+  flex-direction:row;
+  align-items:stretch;
+  gap:12px;
+}
+body.landscape #board-col{
+  order:2;
+  flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+body.landscape .campus-wrap{
+  order:1;
+  flex-shrink:0;
+  /* width 由 JS 設定為 totalW × 1/3 */
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+
+/* ══ 牌盤 ══════════════════════════════════════ */
+.board{
+  display:grid;
+  gap:var(--card-gap);
+}
+
+/* 每張牌容器：固定尺寸，相對定位 */
+.mcard{
+  width:var(--card-size);
+  height:var(--card-size);
+  position:relative;
+  cursor:pointer;
+  flex-shrink:0;
+  border-radius:9px;
+}
+.mcard:hover:not(.matched):not(.flipped) .cback{
+  filter:brightness(1.12);
+  transform:scale(1.05);
+}
+
+/* 牌的兩個面：絕對定位，各自獨立動畫 */
+.cface{
+  position:absolute;
+  inset:0;
+  border-radius:9px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:8% 6%;
+  transition: opacity .35s ease, transform .35s ease;
+  will-change: opacity, transform;
+}
+
+/* ── 牌背：預設顯示 ── */
+.cback{
+  background:linear-gradient(145deg,#5C6BC0,#7E57C2);
+  box-shadow:0 2px 7px rgba(92,107,192,.4);
+  opacity:1;
+  transform:scale(1) rotateY(0deg);
+  z-index:2;
+  transition: opacity .3s ease, transform .3s ease, filter .2s ease;
+}
+.cback-star{font-size:var(--card-emoji);opacity:.65;line-height:1;user-select:none}
+.cback-shine{
+  position:absolute;inset:0;border-radius:9px;
+  background:linear-gradient(135deg,rgba(255,255,255,.24) 0%,transparent 55%);
+  pointer-events:none;
+}
+
+/* ── 牌正面：預設隱藏 ── */
+.cfront{
+  opacity:0;
+  transform:scale(0.7) rotateY(-90deg);
+  z-index:1;
+  box-shadow:0 2px 9px rgba(0,0,0,.2);
+  transition: opacity .3s ease .15s, transform .3s ease .15s;
+}
+.theme-e .cfront{background:linear-gradient(145deg,#2980B9,#1A5276)}
+.theme-g .cfront{background:linear-gradient(145deg,#27AE60,#1A5E34)}
+.theme-m .cfront{background:linear-gradient(145deg,#E74C3C,#922B21)}
+.theme-t .cfront{background:linear-gradient(145deg,#F39C12,#B7770D)}
+
+/* ── 翻開狀態：cback 消失，cfront 顯示 ── */
+.mcard.flipped .cback,
+.mcard.matched .cback{
+  opacity:0;
+  transform:scale(0.7) rotateY(90deg);
+  z-index:1;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.mcard.flipped .cfront,
+.mcard.matched .cfront{
+  opacity:1;
+  transform:scale(1) rotateY(0deg);
+  z-index:2;
+  transition: opacity .3s ease .2s, transform .3s ease .2s;
+}
+
+/* ── 配對成功閃光 ── */
+.mcard.matched .cfront{
+  animation:matchGlow .45s ease .3s both;
+}
+@keyframes matchGlow{
+  0%  {transform:scale(1)}
+  45% {transform:scale(1.13)}
+  80% {transform:scale(0.97)}
+  100%{transform:scale(1)}
+}
+
+/* ── 配對失敗搖晃 ── */
+.mcard.wrong-shake .cfront{
+  animation:wrongShake .38s ease;
+}
+@keyframes wrongShake{
+  0%,100%{transform:scale(1) translateX(0)}
+  25%    {transform:scale(1) translateX(-5px)}
+  65%    {transform:scale(1) translateX(5px)}
+}
+
+/* emoji */
+.cfront-emoji{
+  font-size:var(--card-emoji);
+  line-height:1;
+  margin-bottom:6%;
+  flex-shrink:0;
+  user-select:none;
+}
+/* 系名文字：完整顯示，自動換行，絕不截斷 */
+.cfront-label{
+  font-size:var(--card-text);
+  font-weight:900;
+  color:rgba(255,255,255,.97);
+  text-align:center;
+  line-height:1.3;
+  word-break:keep-all;
+  overflow-wrap:anywhere;
+  width:100%;
+}
+
+/* 配對高亮：玩家顏色框 */
+.mcard.matched.own-p0 .cfront{box-shadow:0 0 0 3px #667eea,0 0 12px rgba(102,126,234,.6)}
+.mcard.matched.own-p1 .cfront{box-shadow:0 0 0 3px #e74c3c,0 0 12px rgba(231,76,60,.6)}
+.mcard.matched.own-p2 .cfront{box-shadow:0 0 0 3px #27ae60,0 0 12px rgba(39,174,96,.6)}
+.mcard.matched.own-p3 .cfront{box-shadow:0 0 0 3px #f39c12,0 0 12px rgba(243,156,18,.6)}
+.mcard.matched:not([class*="own-p"]) .cfront{box-shadow:0 0 0 3px #FFD700,0 0 12px rgba(255,215,0,.5)}
+
+/* ══ 校園區 ═══════════════════════════════════ */
+.campus-wrap{
+  display:flex;flex-direction:column;min-width:0;
+  width:100%; /* 直式：全寬 */
+}
+/* 橫式：寬度由 JS 設定（totalW × 1/3），高度撐滿父容器 */
+body.landscape .campus-wrap{
+  width:auto;   /* JS style.width 覆寫 */
+  flex-shrink:0;
+}
+
+.campus-sec-label{
+  font-size:.66rem;font-weight:800;letter-spacing:.4px;
+  color:#718096;margin-bottom:5px;flex-shrink:0;
+  display:flex;align-items:center;gap:5px;
+}
+.campus-sec-label::after{content:'';flex:1;height:1px;background:#e2e8f0}
+
+/* 直式校園：建築由左→右（flex-row）*/
+.campus{
+  background:linear-gradient(180deg,#87CEEB 0%,#B0E0E6 38%,#8BC34A 38%,#388E3C 100%);
+  border-radius:10px;
+  padding:7px 8px 5px;
+  display:flex;
+  flex-direction:row;
+  align-items:flex-end;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+  gap:5px;
+  position:relative;overflow:hidden;
+  min-height:68px;
+}
+/* 橫式校園：建築由下→上（column-reverse），填滿左欄全高 */
+body.landscape .campus{
+  flex-direction:column-reverse;
+  align-items:center;
+  justify-content:flex-start;
+  flex-wrap:nowrap;
+  overflow-y:auto;
+  flex:1;       /* 撐滿 campus-wrap 剩餘高度 */
+  min-height:0;
+  padding:5px 5px 7px;
+}
+
+.campus-empty{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem;opacity:.18;pointer-events:none;
+}
+.bldg{text-align:center;animation:bldgRise .48s cubic-bezier(.175,.885,.32,1.275) both;flex-shrink:0}
+@keyframes bldgRise{from{transform:translateY(36px) scale(.2);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.bldg-icon{font-size:1.5rem;display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28));line-height:1}
+.bldg-name{
+  font-size:.48rem;font-weight:800;color:white;
+  background:rgba(0,0,0,.45);border-radius:3px;padding:1px 3px;
+  margin-top:1px;white-space:nowrap;max-width:52px;
+  overflow:hidden;text-overflow:ellipsis;
+}
+body.landscape .bldg-icon{font-size:1.3rem}
+body.landscape .bldg-name{font-size:.44rem;max-width:44px}
+
+.game-hint{font-size:.68rem;color:#a0aec0;text-align:center;margin-top:5px;flex-shrink:0;font-style:italic;line-height:1.4}
+
+/* ── UNLOCK POPUP ── */
+.overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(10,10,30,.72);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px}
+.overlay.show{display:flex}
+.popup{background:white;border-radius:26px;padding:28px 26px 24px;max-width:420px;width:100%;text-align:center;position:relative;overflow:hidden;animation:popIn .4s cubic-bezier(.175,.885,.32,1.275) both;box-shadow:0 28px 72px rgba(0,0,0,.38)}
+.popup-ribbon{position:absolute;top:0;left:0;right:0;height:5px}
+.popup-icon{font-size:3.5rem;margin:6px 0 8px;line-height:1;display:block;animation:iconBounce .5s ease}
+@keyframes iconBounce{0%{transform:scale(0) rotate(-30deg)}70%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+.popup-tag{font-size:.66rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#a0aec0;margin-bottom:4px}
+.popup-name{font-size:1.35rem;font-weight:900;color:#2d3748;margin-bottom:6px;line-height:1.2}
+.popup-badge{display:inline-block;font-size:.74rem;font-weight:800;padding:4px 14px;border-radius:50px;margin-bottom:11px}
+.popup-desc{font-size:.85rem;color:#4a5568;line-height:1.6;margin-bottom:12px}
+.popup-equip{background:#f7fafc;border-radius:12px;padding:10px 14px;font-size:.79rem;color:#2d3748;text-align:left;margin-bottom:16px;border-left:4px solid}
+.popup-equip-title{font-weight:800;margin-bottom:5px}
+.popup-equip-list{color:#4a5568;line-height:1.7}
+.btn-continue{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:12px;padding:12px;font-size:.93rem;font-weight:900;cursor:pointer;font-family:'Noto Sans TC',sans-serif;width:100%;transition:all .2s}
+.btn-continue:hover{transform:translateY(-2px)}
+.confetti-zone{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:26px}
+.cdot{position:absolute;border-radius:50%;top:-10px;animation:cdotFall linear forwards}
+@keyframes cdotFall{from{transform:translateY(0) rotate(0) scale(1);opacity:1}to{transform:translateY(230px) rotate(720deg) scale(.2);opacity:0}}
+
+/* ── SCORE FLASH ── */
+.score-flash{position:fixed;top:18px;right:18px;z-index:300;background:linear-gradient(135deg,#FFD700,#FFA000);color:#7B5E00;font-size:.95rem;font-weight:900;padding:8px 18px;border-radius:50px;box-shadow:0 5px 18px rgba(255,165,0,.4);animation:sFlash .85s ease forwards;pointer-events:none}
+@keyframes sFlash{0%{transform:translateY(-18px);opacity:0}18%{transform:translateY(0);opacity:1}72%{transform:translateY(0);opacity:1}100%{transform:translateY(-18px);opacity:0}}
+
+/* ── TURN ANNOUNCE ── */
+.turn-announce{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.4);
+  z-index:250;background:white;border-radius:24px;padding:28px 36px;
+  text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35);
+  opacity:0;pointer-events:none;transition:none;
+}
+.turn-announce.show{
+  animation:announceIn .5s cubic-bezier(.175,.885,.32,1.275) forwards;
+}
+@keyframes announceIn{
+  0%{transform:translate(-50%,-50%) scale(.4);opacity:0}
+  60%{transform:translate(-50%,-50%) scale(1.06);opacity:1}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:1}
+}
+.turn-announce.hide{animation:announceOut .3s ease forwards}
+@keyframes announceOut{to{transform:translate(-50%,-50%) scale(.6);opacity:0}}
+.announce-avatar{font-size:3rem;display:block;margin-bottom:8px}
+.announce-text{font-size:1.3rem;font-weight:900;color:#2d3748}
+.announce-sub{font-size:.85rem;color:#718096;margin-top:4px}
+
+/* ── MULTI-PLAYER RESULT ── */
+.mp-result-overlay{display:none;position:fixed;inset:0;z-index:210;background:rgba(10,10,30,.8);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px}
+.mp-result-overlay.show{display:flex}
+.mp-result-box{background:white;border-radius:28px;padding:0;max-width:520px;width:100%;overflow:hidden;animation:popIn .5s cubic-bezier(.175,.885,.32,1.275) both;box-shadow:0 32px 80px rgba(0,0,0,.4)}
+.mp-result-header{padding:28px 28px 20px;text-align:center}
+.mp-result-title{font-size:1.6rem;font-weight:900;color:white;margin-bottom:4px}
+.mp-result-sub{color:rgba(255,255,255,.85);font-size:.88rem}
+.mp-podium{padding:20px 24px;display:flex;flex-direction:column;gap:8px}
+.mp-podium-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:16px;border:2px solid}
+.mp-podium-rank{font-size:1.8rem;width:36px;text-align:center;flex-shrink:0}
+.mp-podium-info{flex:1}
+.mp-podium-name{font-size:1rem;font-weight:900}
+.mp-podium-detail{font-size:.76rem;color:#718096;font-weight:600;margin-top:2px}
+.mp-podium-pts{font-size:1.4rem;font-weight:900;text-align:right}
+.mp-result-btns{display:flex;gap:10px;padding:0 24px 24px}
+.btn-mp-again{flex:1;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:13px;padding:13px;font-size:.93rem;font-weight:900;cursor:pointer;font-family:'Noto Sans TC',sans-serif;box-shadow:0 5px 18px rgba(102,126,234,.4)}
+.btn-mp-home{flex:1;background:white;color:#667eea;border:2.5px solid #667eea;border-radius:13px;padding:13px;font-size:.93rem;font-weight:900;cursor:pointer;font-family:'Noto Sans TC',sans-serif}
+
+/* ── SINGLE RESULT ── */
+#screen-result .glass{max-width:600px}
+.result-header{background:linear-gradient(135deg,#f093fb,#f5576c,#4facfe);padding:32px 28px 26px;text-align:center}
+.result-trophy{font-size:4rem;animation:trophySpin .8s ease both;display:block;margin-bottom:8px}
+@keyframes trophySpin{from{transform:rotate(-30deg) scale(0);opacity:0}to{transform:rotate(0) scale(1);opacity:1}}
+.result-title{font-size:1.8rem;font-weight:900;color:white;margin-bottom:5px}
+.result-sub{color:rgba(255,255,255,.85);font-size:.9rem}
+.result-body{padding:22px 24px 26px}
+.score-summary{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:22px;padding:18px;background:#f8faff;border-radius:16px;border:2px solid #e8edff}
+.score-item{text-align:center}
+.score-val{font-size:1.9rem;font-weight:900;line-height:1}
+.score-lab{font-size:.7rem;color:#718096;font-weight:700;margin-top:2px}
+.reg-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#667eea;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.reg-title::after{content:'';flex:1;height:1px;background:#e2e8f0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+@media(max-width:500px){.form-grid{grid-template-columns:1fr}}
+.form-field{display:flex;flex-direction:column;gap:4px}
+.form-label{font-size:.72rem;font-weight:800;color:#4a5568}
+.form-input{border:2px solid #e2e8f0;border-radius:11px;padding:9px 13px;font-size:.88rem;font-family:'Noto Sans TC',sans-serif;color:#2d3748;outline:none;transition:border-color .2s;background:white}
+.form-input:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
+.form-input.error{border-color:#e74c3c}
+.form-err{font-size:.7rem;color:#e74c3c;font-weight:600;min-height:.9em}
+.btn-submit{width:100%;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:13px;padding:14px;font-size:1rem;font-weight:900;cursor:pointer;font-family:'Noto Sans TC',sans-serif;box-shadow:0 6px 20px rgba(102,126,234,.4);transition:all .2s;margin-bottom:9px}
+.btn-submit:hover{transform:translateY(-2px)}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-skip{width:100%;background:transparent;border:2px solid #e2e8f0;border-radius:13px;padding:10px;font-size:.86rem;font-weight:700;color:#a0aec0;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .2s}
+.btn-skip:hover{border-color:#667eea;color:#667eea}
+.privacy-note{font-size:.66rem;color:#a0aec0;text-align:center;margin-top:8px;font-style:italic}
+
+/* ── LEADERBOARD ── */
+#screen-lb .glass{max-width:820px}
+.lb-header{background:linear-gradient(135deg,#f7971e,#ffd200,#f7971e);padding:28px 28px 22px;text-align:center;position:relative;overflow:hidden}
+.lb-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.04) 10px,rgba(255,255,255,.04) 20px)}
+.lb-crown{font-size:3.5rem;display:block;margin-bottom:6px;animation:crownBounce 1s ease both}
+@keyframes crownBounce{0%{transform:translateY(-20px);opacity:0}60%{transform:translateY(6px)}100%{transform:translateY(0);opacity:1}}
+.lb-title{font-size:1.8rem;font-weight:900;color:#2d3748;margin-bottom:3px}
+.lb-sub{color:#5d4e37;font-size:.88rem;font-weight:600}
+.lb-body{padding:20px 22px 24px}
+.lb-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.lb-count{font-size:.78rem;font-weight:800;color:#718096}
+.lb-nav{display:flex;gap:7px}
+.lb-nav-btn{padding:6px 14px;border-radius:50px;font-size:.8rem;font-weight:800;cursor:pointer;border:2px solid #667eea;color:#667eea;background:white;font-family:'Noto Sans TC',sans-serif;transition:all .2s}
+.lb-nav-btn:hover,.lb-nav-btn.active{background:#667eea;color:white}
+.lb-table{width:100%;border-collapse:separate;border-spacing:0 5px}
+.lb-table th{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#a0aec0;padding:0 8px 7px;text-align:left}
+.lb-table th:last-child,.lb-table td:last-child{text-align:right}
+.lb-row{background:white;border-radius:13px;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:transform .2s}
+.lb-row:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.1)}
+.lb-row.top1{background:linear-gradient(135deg,#fff9e6,#fff3cc);box-shadow:0 4px 16px rgba(255,200,0,.2)}
+.lb-row.top2{background:linear-gradient(135deg,#f5f5f5,#e8e8e8)}
+.lb-row.top3{background:linear-gradient(135deg,#fff0eb,#ffe5d5)}
+.lb-row td{padding:11px 8px;font-size:.84rem;font-weight:700;color:#2d3748;vertical-align:middle}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:.82rem;font-weight:900}
+.rank-1{background:linear-gradient(135deg,#FFD700,#FFA000);color:white}
+.rank-2{background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:white}
+.rank-3{background:linear-gradient(135deg,#cd7f32,#a0522d);color:white}
+.rank-n{background:#f0f4ff;color:#667eea;font-size:.72rem}
+.lb-name{font-weight:900;font-size:.88rem}
+.lb-school{font-size:.72rem;color:#718096;font-weight:600;margin-top:1px}
+.lb-dept-tag{display:inline-block;font-size:.66rem;font-weight:800;padding:2px 7px;border-radius:50px;background:#f0f4ff;color:#667eea;border:1px solid #c3d0ff}
+.time-val{font-size:.95rem;font-weight:900;color:#667eea}
+.moves-val{font-size:.78rem;color:#a0aec0;font-weight:700}
+.lb-empty{text-align:center;padding:36px 20px;color:#a0aec0}
+.lb-empty-icon{font-size:2.8rem;display:block;margin-bottom:8px}
+.lb-footer{display:flex;gap:10px;flex-wrap:wrap;padding:0 22px 22px}
+.btn-lb-back{flex:1;min-width:110px;background:white;color:#667eea;border:2.5px solid #667eea;border-radius:13px;padding:12px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .2s;text-align:center}
+.btn-lb-back:hover{background:#f0f4ff}
+.btn-lb-play{flex:2;min-width:150px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:13px;padding:12px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:'Noto Sans TC',sans-serif;box-shadow:0 5px 18px rgba(102,126,234,.4)}
+.btn-lb-play:hover{transform:translateY(-2px)}
+/* 刪除全部按鈕 */
+.btn-lb-clearall{
+  background:white;color:#e74c3c;border:2px solid #e74c3c;
+  border-radius:11px;padding:10px 20px;font-size:.88rem;font-weight:900;
+  cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .2s;
+  width:100%;margin-top:8px;
+}
+.btn-lb-clearall:hover{background:#fff0f0}
+/* 危險操作收合區 */
+.lb-danger-zone{
+  margin-top:18px;
+  border-top:1px dashed #e2e8f0;
+  padding-top:10px;
+  text-align:center;
+}
+.lb-danger-toggle{
+  background:none;border:none;
+  color:#c0c8d8;font-size:.72rem;font-weight:700;
+  cursor:pointer;padding:4px 10px;border-radius:6px;
+  font-family:'Noto Sans TC',sans-serif;
+  letter-spacing:.5px;transition:color .2s;
+  user-select:none;
+}
+.lb-danger-toggle:hover{color:#a0aec0}
+.lb-danger-panel{
+  max-height:0;overflow:hidden;
+  transition:max-height .35s ease, opacity .3s ease;
+  opacity:0;
+}
+.lb-danger-panel.open{
+  max-height:120px;
+  opacity:1;
+}
+.lb-danger-warn{
+  font-size:.74rem;color:#e74c3c;font-weight:700;
+  background:#fff5f5;border-radius:8px;padding:7px 12px;
+  margin-bottom:6px;margin-top:8px;
+  border:1px solid #fed7d7;
+}
+/* 刪除確認 overlay */
+.del-confirm-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center;z-index:9999;
+  opacity:0;pointer-events:none;transition:opacity .22s;
+}
+.del-confirm-overlay.show{opacity:1;pointer-events:all}
+.del-confirm-box{
+  background:white;border-radius:22px;padding:28px 26px 22px;
+  max-width:340px;width:90%;text-align:center;
+  box-shadow:0 24px 60px rgba(0,0,0,.32);
+  animation:popIn .3s cubic-bezier(.175,.885,.32,1.275) both;
+}
+.del-confirm-icon{font-size:2.8rem;margin-bottom:8px}
+.del-confirm-title{font-size:1.1rem;font-weight:900;color:#2d3748;margin-bottom:6px}
+.del-confirm-sub{font-size:.84rem;color:#718096;margin-bottom:20px;line-height:1.5}
+.del-confirm-btns{display:flex;gap:10px}
+.del-confirm-cancel{flex:1;padding:11px;border:2px solid #e2e8f0;border-radius:11px;
+  background:white;color:#718096;font-weight:800;font-size:.9rem;cursor:pointer;
+  font-family:'Noto Sans TC',sans-serif;}
+.del-confirm-ok{flex:1;padding:11px;border:none;border-radius:11px;
+  background:#e74c3c;color:white;font-weight:900;font-size:.9rem;cursor:pointer;
+  font-family:'Noto Sans TC',sans-serif;}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#cbd5e0;border-radius:6px}
+
+/* ── ORIENTATION TOGGLE ── */
+.orient-toggle{
+  display:flex;align-items:center;gap:0;
+  background:#f0f0f0;border-radius:50px;padding:3px;
+  border:2px solid #e2e8f0;
+}
+.orient-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 18px;border-radius:46px;
+  font-size:.82rem;font-weight:800;cursor:pointer;
+  border:none;background:transparent;
+  font-family:'Noto Sans TC',sans-serif;color:#718096;
+  transition:all .25s;white-space:nowrap;
+}
+.orient-btn.active{
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:white;box-shadow:0 3px 12px rgba(102,126,234,.4);
+}
+.orient-btn:not(.active):hover{background:rgba(102,126,234,.1);color:#667eea}
+.orient-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:18px;flex-wrap:wrap;gap:10px;
+}
+.orient-label{font-size:.73rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:1.5px;color:#a0aec0;display:flex;align-items:center;gap:6px}
+
+/* ── 放棄按鈕：在 campus-wrap 最底部 ── */
+.game-cancel-wrap{
+  margin-top:auto;    /* 推到 campus-wrap 底部 */
+  padding-top:8px;
+  text-align:center;
+  flex-shrink:0;
+  border-top:1px solid #f0f0f0;
+}
+.btn-cancel-game{
+  display:inline-flex;align-items:center;gap:7px;
+  background:transparent;border:2px solid #fed7d7;
+  color:#e53e3e;border-radius:50px;
+  padding:8px 24px;font-size:.84rem;font-weight:800;
+  cursor:pointer;font-family:'Noto Sans TC',sans-serif;
+  transition:all .2s;
+}
+.btn-cancel-game:hover{background:#fff5f5;border-color:#e53e3e;transform:scale(1.03)}
+
+/* ── CONFIRM DIALOG ── */
+.confirm-overlay{
+  display:none;position:fixed;inset:0;z-index:400;
+  background:rgba(10,10,30,.65);backdrop-filter:blur(6px);
+  align-items:center;justify-content:center;padding:20px;
+}
+.confirm-overlay.show{display:flex}
+.confirm-box{
+  background:white;border-radius:22px;padding:32px 28px 24px;
+  max-width:340px;width:100%;text-align:center;
+  box-shadow:0 24px 64px rgba(0,0,0,.35);
+  animation:popIn .35s cubic-bezier(.175,.885,.32,1.275) both;
+}
+.confirm-icon{font-size:3rem;margin-bottom:10px;display:block}
+.confirm-title{font-size:1.25rem;font-weight:900;color:#2d3748;margin-bottom:7px}
+.confirm-sub{font-size:.87rem;color:#718096;line-height:1.6;margin-bottom:22px}
+.confirm-btns{display:flex;gap:10px}
+.btn-confirm-yes{
+  flex:1;background:linear-gradient(135deg,#e53e3e,#c53030);
+  color:white;border:none;border-radius:12px;padding:12px;
+  font-size:.93rem;font-weight:900;cursor:pointer;
+  font-family:'Noto Sans TC',sans-serif;transition:all .2s;
+}
+.btn-confirm-yes:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(229,62,62,.4)}
+.btn-confirm-no{
+  flex:1;background:white;color:#667eea;border:2.5px solid #667eea;
+  border-radius:12px;padding:12px;font-size:.93rem;font-weight:900;
+  cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .2s;
+}
+.btn-confirm-no:hover{background:#f0f4ff}
+
+/* ── EXPORT BUTTON ── */
+.btn-export{
+  display:inline-flex;align-items:center;gap:7px;
+  background:linear-gradient(135deg,#11998e,#38ef7d);
+  color:white;border:none;border-radius:13px;
+  padding:11px 22px;font-size:.9rem;font-weight:900;
+  cursor:pointer;font-family:'Noto Sans TC',sans-serif;
+  box-shadow:0 5px 18px rgba(17,153,142,.35);transition:all .2s;
+}
+.btn-export:hover{transform:translateY(-2px);box-shadow:0 9px 26px rgba(17,153,142,.5)}
+.btn-export:active{transform:translateY(0)}
+
+/* ── WELCOME SPLASH OVERLAY ── */
+#welcome-splash{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:linear-gradient(135deg,#0f0c29 0%,#302b63 40%,#764ba2 70%,#f093fb 100%);
+  align-items:center;justify-content:center;flex-direction:column;
+  overflow:hidden;
+}
+#welcome-splash.show{display:flex}
+.splash-firework{position:absolute;pointer-events:none}
+.splash-ring{
+  position:absolute;border-radius:50%;border:3px solid;
+  animation:ringExpand 1.8s ease-out forwards;opacity:0;
+}
+@keyframes ringExpand{
+  0%{transform:scale(0);opacity:.8}
+  100%{transform:scale(4);opacity:0}
+}
+.splash-star{
+  position:absolute;font-size:2rem;pointer-events:none;
+  animation:starFloat 2.5s ease-out forwards;
+}
+@keyframes starFloat{
+  0%{transform:translate(0,0) rotate(0) scale(0);opacity:1}
+  60%{opacity:1}
+  100%{transform:translate(var(--tx),var(--ty)) rotate(720deg) scale(1.2);opacity:0}
+}
+.splash-school{
+  font-size:clamp(1rem,3.5vw,1.5rem);font-weight:800;
+  color:rgba(255,255,255,.75);letter-spacing:3px;
+  text-transform:uppercase;margin-bottom:12px;
+  animation:splashFadeUp .6s ease both;
+}
+.splash-main{
+  font-size:clamp(2rem,7vw,4.2rem);font-weight:900;
+  color:white;text-align:center;line-height:1.15;
+  text-shadow:0 4px 30px rgba(0,0,0,.3);
+  animation:splashFadeUp .7s ease .15s both;
+}
+.splash-sub{
+  font-size:clamp(.95rem,2.5vw,1.35rem);
+  color:rgba(255,255,255,.88);text-align:center;
+  margin-top:10px;font-weight:600;line-height:1.6;
+  animation:splashFadeUp .7s ease .3s both;
+}
+.splash-emoji-row{
+  display:flex;gap:18px;margin-top:24px;flex-wrap:wrap;justify-content:center;
+  animation:splashFadeUp .7s ease .45s both;
+}
+.splash-emoji-item{
+  font-size:2.8rem;
+  animation:emojiPop 0.5s cubic-bezier(.175,.885,.32,1.275) both;
+}
+.splash-btn{
+  margin-top:32px;padding:14px 42px;
+  background:white;color:#764ba2;
+  border:none;border-radius:50px;
+  font-size:1.1rem;font-weight:900;cursor:pointer;
+  font-family:'Noto Sans TC',sans-serif;
+  box-shadow:0 8px 28px rgba(0,0,0,.25);
+  animation:splashFadeUp .7s ease .6s both;
+  transition:all .2s;
+}
+.splash-btn:hover{transform:scale(1.06);box-shadow:0 14px 36px rgba(0,0,0,.3)}
+@keyframes splashFadeUp{
+  from{transform:translateY(30px);opacity:0}
+  to{transform:translateY(0);opacity:1}
+}
+@keyframes emojiPop{
+  from{transform:scale(0) rotate(-30deg);opacity:0}
+  to{transform:scale(1) rotate(0);opacity:1}
+}
+.splash-confetti-dot{
+  position:absolute;border-radius:50%;pointer-events:none;
+  animation:splashConfetti linear forwards;
+}
+@keyframes splashConfetti{
+  0%{transform:translateY(-20px) rotate(0);opacity:1}
+  100%{transform:translateY(110vh) rotate(1080deg);opacity:.1}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-canvas">
+  <div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+</div>
+<div id="floaters"></div>
+
+<!-- ══ SCREEN 1: WELCOME ══ -->
+<div class="screen active" id="screen-welcome">
+  <div class="glass">
+    <div class="welcome-header">
+      <div class="school-badge">🏫 亞東科技大學 AEUST</div>
+      <h1 class="welcome-title">校園探索大冒險</h1>
+      <p class="welcome-sub">翻牌解鎖11個系 · 建造你的夢想校園 · 登上英雄榜！</p>
+    </div>
+    <div class="welcome-body">
+
+      <!-- STEP 1: 選擇感興趣學院 -->
+      <div class="step-label">Step 1 · 選擇最感興趣的學院</div>
+      <div class="college-pick-grid">
+        <div class="cp-card cp-e" data-college="e" onclick="pickCollege(this)">
+          <span class="cp-icon">⚡</span>
+          <div class="cp-name">電通學院</div>
+          <div class="cp-dept-list">通訊工程系<br>電機工程系<br>電子工程系</div>
+        </div>
+        <div class="cp-card cp-g" data-college="g" onclick="pickCollege(this)">
+          <span class="cp-icon">🔧</span>
+          <div class="cp-name">工程學院</div>
+          <div class="cp-dept-list">材料織品服裝系<br>機械工程系<br>工商業設計系</div>
+        </div>
+        <div class="cp-card cp-m" data-college="m" onclick="pickCollege(this)">
+          <span class="cp-icon">💊</span>
+          <div class="cp-name">醫護暨管理學院</div>
+          <div class="cp-dept-list">工業管理系 · 資訊管理系<br>行銷與流通管理系<br>醫務管理系 · 護理系</div>
+        </div>
+        <div class="cp-card cp-t" data-college="t" onclick="pickCollege(this)">
+          <span class="cp-icon">📚</span>
+          <div class="cp-name">通識教育中心</div>
+          <div class="cp-dept-list">外語 · 藝術 · 體育<br>英語村沉浸式學習<br>人文跨域素養</div>
+        </div>
+      </div>
+
+      <!-- STEP 2: 選擇遊戲人數 -->
+      <div class="step-label">Step 2 · 選擇遊戲人數</div>
+      <div class="mode-grid">
+        <div class="mode-card" data-mode="1" onclick="pickMode(this)">
+          <span class="mode-icon">🧑</span>
+          <div class="mode-name">單人挑戰</div>
+          <div class="mode-desc">計入排行榜<br>挑戰最快時間</div>
+        </div>
+        <div class="mode-card" data-mode="2" onclick="pickMode(this)">
+          <span class="mode-icon">👫</span>
+          <div class="mode-name">2人對戰</div>
+          <div class="mode-desc">輪流翻牌<br>搶奪配對分數</div>
+        </div>
+        <div class="mode-card" data-mode="3" onclick="pickMode(this)">
+          <span class="mode-icon">👨‍👩‍👦</span>
+          <div class="mode-name">3人對戰</div>
+          <div class="mode-desc">輪流翻牌<br>搶奪配對分數</div>
+        </div>
+        <div class="mode-card" data-mode="4" onclick="pickMode(this)">
+          <span class="mode-icon">👨‍👩‍👧‍👦</span>
+          <div class="mode-name">4人對戰</div>
+          <div class="mode-desc">輪流翻牌<br>搶奪配對分數</div>
+        </div>
+      </div>
+
+      <div class="info-pills">
+        <div class="info-pill">🎮 12組配對 · 找出相同圖案</div>
+        <div class="info-pill">🏗️ 解鎖即建造校園</div>
+        <div class="info-pill">🏆 單人模式計入排行榜</div>
+        <div class="info-pill">📍 新北板橋 · 捷運2分鐘</div>
+      </div>
+      <button class="btn-start" id="btn-start" disabled onclick="startGame()">🚀 開始探索亞東校園！</button>
+      <div style="text-align:center;margin-top:11px">
+        <button onclick="showScreen('screen-lb')" style="background:none;border:none;color:#667eea;font-weight:800;font-size:.86rem;cursor:pointer;text-decoration:underline;font-family:'Noto Sans TC',sans-serif">🏆 查看英雄排行榜</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 2: GAME ══ -->
+<div class="screen" id="screen-game">
+  <div class="glass">
+    <div class="game-topbar">
+      <div class="game-logo" id="game-logo">🏫 亞東科大探索地圖</div>
+      <div class="topbar-right">
+        <div class="stat-chip"><span>解鎖 </span><span id="s-pairs">0</span><span>/12</span></div>
+        <div class="stat-chip" id="s-moves-wrap"><span>翻牌 </span><span id="s-moves">0</span></div>
+        <div class="stat-chip" id="s-timer">⏱ 00:00</div>
+        <button class="sound-btn" id="sound-btn" onclick="toggleSound()">🔊</button>
+      </div>
+    </div>
+    <div class="game-body">
+      <!-- 進度條：兩種版面都在頂部，全寬 -->
+      <div class="progress-wrap">
+        <div class="progress-meta"><span>解鎖進度</span><span id="prog-pct">0%</span></div>
+        <div class="progress-track"><div class="progress-bar" id="prog-bar" style="width:0%"></div></div>
+      </div>
+
+      <!-- 主內容：直式=上(牌)下(校園)；橫式=左(校園+標籤)右(牌) -->
+      <div class="game-layout">
+
+        <!-- 左欄（橫式）/ 下方（直式）：校園 + 學院標籤 + 放棄按鈕 -->
+        <div class="campus-wrap" id="side-col">
+          <!-- 多人計分板 -->
+          <div class="mp-scores" id="mp-scores" style="display:none"></div>
+          <!-- 學院解鎖標籤 -->
+          <div class="college-tabs">
+            <div class="ctab ctab-e locked" id="ctab-e">⚡ 電通學院</div>
+            <div class="ctab ctab-g locked" id="ctab-g">🔧 工程學院</div>
+            <div class="ctab ctab-m locked" id="ctab-m">💊 醫護暨管理學院</div>
+            <div class="ctab ctab-t locked" id="ctab-t">📚 通識教育中心</div>
+          </div>
+          <!-- 校園建築 -->
+          <div class="campus-sec-label">🏗️ 我的亞東校園</div>
+          <div class="campus" id="campus">
+            <div class="campus-empty" id="campus-empty">🏫</div>
+          </div>
+          <div class="game-hint" id="game-hint">找出兩張相同的圖案牌 → 解鎖該系介紹 ✨</div>
+          <!-- 放棄按鈕 -->
+          <div class="game-cancel-wrap">
+            <button class="btn-cancel-game" onclick="confirmCancelGame()">✖ 放棄對戰，返回首頁</button>
+          </div>
+        </div>
+
+        <!-- 右欄（橫式）/ 上方（直式）：純牌盤 -->
+        <div id="board-col">
+          <div class="board" id="board"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 3: SINGLE RESULT + REGISTER ══ -->
+<div class="screen" id="screen-result">
+  <div class="glass">
+    <div class="result-header">
+      <span class="result-trophy">🎊</span>
+      <div class="result-title">恭喜！探索完成！</div>
+      <div class="result-sub">你已解鎖亞東科大所有系所，校園建造完成！</div>
+    </div>
+    <div class="result-body">
+      <div class="score-summary">
+        <div class="score-item"><div class="score-val" style="color:#667eea" id="res-moves">-</div><div class="score-lab">翻牌次數</div></div>
+        <div class="score-item"><div class="score-val" style="color:#27ae60" id="res-time">-</div><div class="score-lab">完成時間</div></div>
+        <div class="score-item"><div class="score-val" style="color:#e74c3c">12</div><div class="score-lab">系所解鎖</div></div>
+        <div class="score-item"><div class="score-val" style="color:#f39c12" id="res-rank-preview">-</div><div class="score-lab">目前排名</div></div>
+      </div>
+      <div class="reg-title">📋 登錄資料，上榜英雄榜</div>
+      <div class="form-grid">
+        <div class="form-field"><div class="form-label">姓名 *</div><input class="form-input" id="f-name" type="text" placeholder="請輸入姓名" maxlength="20"><div class="form-err" id="e-name"></div></div>
+        <div class="form-field"><div class="form-label">就讀高中職名稱 *</div><input class="form-input" id="f-school" type="text" placeholder="例：XX高中" maxlength="30"><div class="form-err" id="e-school"></div></div>
+        <div class="form-field"><div class="form-label">科別名稱 *</div><input class="form-input" id="f-dept" type="text" placeholder="例：電機科" maxlength="20"><div class="form-err" id="e-dept"></div></div>
+        <div class="form-field"><div class="form-label">聯繫電子郵件 *</div><input class="form-input" id="f-email" type="email" placeholder="example@email.com" maxlength="50"><div class="form-err" id="e-email"></div></div>
+      </div>
+      <button class="btn-submit" id="btn-submit" onclick="submitScore()">🏆 提交成績，上榜英雄！</button>
+      <button class="btn-skip" onclick="skipToLb()">略過，直接查看排行榜</button>
+      <div class="privacy-note">🔒 姓名與 Email 將部分遮蔽顯示於排行榜以保護隱私</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 4: LEADERBOARD ══ -->
+<div class="screen" id="screen-lb">
+  <div class="glass">
+    <div class="lb-header">
+      <span class="lb-crown">👑</span>
+      <div class="lb-title">🏆 英雄排行榜</div>
+      <div class="lb-sub">挑戰最快完成時間，登上傳說榜首！</div>
+    </div>
+    <div class="lb-body">
+      <div class="lb-controls">
+        <div class="lb-count" id="lb-count">共 0 位挑戰者</div>
+        <div class="lb-nav">
+          <button class="lb-nav-btn active" onclick="sortLb('time')">⏱ 依時間</button>
+          <button class="lb-nav-btn" onclick="sortLb('moves')">🎯 依翻牌數</button>
+        </div>
+      </div>
+      <table class="lb-table">
+        <thead><tr>
+          <th style="width:40px">名次</th>
+          <th>姓名 / 學校 / 科別</th>
+          <th>完成時間</th>
+          <th>翻牌次數</th>
+        </tr></thead>
+        <tbody id="lb-tbody"></tbody>
+      </table>
+      <div id="lb-empty" class="lb-empty" style="display:none">
+        <span class="lb-empty-icon">🎮</span>還沒有人上榜，快來挑戰吧！
+      </div>
+
+      <!-- 危險操作區：預設收合，需主動展開 -->
+      <div class="lb-danger-zone" id="lb-danger-zone">
+        <button class="lb-danger-toggle" onclick="toggleDangerZone()" id="lb-danger-toggle">
+          ⚙ 管理資料
+        </button>
+        <div class="lb-danger-panel" id="lb-danger-panel">
+          <div class="lb-danger-warn">⚠️ 以下操作無法復原，請謹慎使用</div>
+          <button class="btn-lb-clearall" onclick="confirmClearAll()">🗑 清空全部排行榜資料</button>
+        </div>
+      </div>
+    </div>
+    <div class="lb-footer">
+      <button class="btn-lb-back" onclick="showScreen('screen-welcome')">← 返回首頁</button>
+      <button class="btn-export" onclick="exportExcel()">📊 匯出 Excel</button>
+      <button class="btn-lb-play" onclick="goPlayAgain()">🚀 我要挑戰！</button>
+    </div>
+  </div>
+</div>
+
+<!-- 刪除確認 overlay -->
+<div class="del-confirm-overlay" id="del-confirm-overlay">
+  <div class="del-confirm-box">
+    <div class="del-confirm-icon" id="del-confirm-icon">🗑️</div>
+    <div class="del-confirm-title" id="del-confirm-title">確定要刪除？</div>
+    <div class="del-confirm-sub" id="del-confirm-sub">此操作無法復原</div>
+    <div class="del-confirm-btns">
+      <button class="del-confirm-cancel" onclick="closeDlConfirm()">取消</button>
+      <button class="del-confirm-ok" onclick="execDlConfirm()">確定刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- UNLOCK POPUP -->
+<div class="overlay" id="popup-overlay">
+  <div class="popup">
+    <div class="confetti-zone" id="confetti-zone"></div>
+    <div class="popup-ribbon" id="popup-ribbon"></div>
+    <span class="popup-icon" id="pop-icon">🎉</span>
+    <div class="popup-tag">🎉 系所解鎖！</div>
+    <div class="popup-name" id="pop-name"></div>
+    <div class="popup-badge" id="pop-badge"></div>
+    <div class="popup-desc" id="pop-desc"></div>
+    <div class="popup-equip" id="pop-equip">
+      <div class="popup-equip-title" id="pop-equip-title">🛠️ 特色設備</div>
+      <div class="popup-equip-list" id="pop-equip-list"></div>
+    </div>
+    <button class="btn-continue" onclick="closePopup()">繼續建造校園 →</button>
+  </div>
+</div>
+
+<!-- TURN ANNOUNCE -->
+<div class="turn-announce" id="turn-announce">
+  <span class="announce-avatar" id="ann-avatar">🧑</span>
+  <div class="announce-text" id="ann-text">換你了！</div>
+  <div class="announce-sub" id="ann-sub">玩家1</div>
+</div>
+
+<!-- MULTI-PLAYER RESULT OVERLAY -->
+<div class="mp-result-overlay" id="mp-result-overlay">
+  <div class="mp-result-box">
+    <div class="mp-result-header" id="mp-result-header">
+      <div class="mp-result-title">🎊 遊戲結束！</div>
+      <div class="mp-result-sub">亞東科大11個系所已全部解鎖！</div>
+    </div>
+    <div class="mp-podium" id="mp-podium"></div>
+    <div class="mp-result-btns">
+      <button class="btn-mp-again" onclick="mpPlayAgain()">🔄 再玩一次</button>
+      <button class="btn-mp-home" onclick="mpGoHome()">🏠 返回首頁</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONFIRM CANCEL DIALOG ══ -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <span class="confirm-icon">🚪</span>
+    <div class="confirm-title">確定要放棄對戰？</div>
+    <div class="confirm-sub">目前的遊戲進度將不會保存，<br>成績也不會計入排行榜。</div>
+    <div class="confirm-btns">
+      <button class="btn-confirm-yes" onclick="doCancelGame()">放棄，回首頁</button>
+      <button class="btn-confirm-no" onclick="closeConfirm()">繼續對戰！</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WELCOME SPLASH OVERLAY ══ -->
+<div id="welcome-splash">
+  <div id="splash-stars"></div>
+  <div id="splash-confetti-wrap"></div>
+  <div class="splash-school">🏫 亞東科技大學 AEUST</div>
+  <div class="splash-main" id="splash-main">歡迎您！<br>加入亞東大家庭 🎉</div>
+  <div class="splash-sub" id="splash-sub">
+    感謝你完成校園探索大冒險！<br>
+    亞東科技大學在新北板橋，期待與你相遇 ✨
+  </div>
+  <div class="splash-emoji-row">
+    <span class="splash-emoji-item" style="animation-delay:.5s">⚡</span>
+    <span class="splash-emoji-item" style="animation-delay:.6s">🔧</span>
+    <span class="splash-emoji-item" style="animation-delay:.7s">💊</span>
+    <span class="splash-emoji-item" style="animation-delay:.8s">📚</span>
+    <span class="splash-emoji-item" style="animation-delay:.9s">🎓</span>
+    <span class="splash-emoji-item" style="animation-delay:1s">🌟</span>
+  </div>
+  <button class="splash-btn" onclick="closeSplash()">前往排行榜 🏆</button>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   DATA
+══════════════════════════════════════ */
+const DEPTS=[
+  {id:0,name:'通訊工程系',college:'電通學院',theme:'e',emoji:'📡',bldg:'📡',
+   desc:'5G時代的先鋒！學習無線通訊、天線設計、物聯網應用，畢業直送遠傳電信、中華電信等頂尖企業。',
+   equip:['5G通訊系統實驗室','RF射頻量測平台','物聯網開發套件','智慧汽車通訊設備']},
+  {id:1,name:'電機工程系',college:'電通學院',theme:'e',emoji:'⚡',bldg:'⚡',
+   desc:'電力、自動化、智慧控制！從工業機器手臂到電動車系統，電機人才是產業升級最強推手。',
+   equip:['高功率電力電子實驗室','PLC可程式控制器','馬達驅動測試台','工業機器手臂']},
+  {id:2,name:'電子工程系',college:'電通學院',theme:'e',emoji:'🔌',bldg:'🔌',
+   desc:'半導體設計、FPGA、嵌入式系統！台灣護國神山的背後，就是無數優秀的電子工程師。',
+   equip:['IC設計EDA模擬軟體','FPGA開發平台','半導體量測儀器','嵌入式系統開發板']},
+  {id:3,name:'材料織品服裝系',college:'工程學院',theme:'g',emoji:'👗',bldg:'👗',
+   desc:'時尚科技跨界融合！開發防水透濕機能布料、智慧紡織品，擁有獨家機能時尚紡織品研發中心。',
+   equip:['機能紡織品研發中心','染整實驗設備','3D服裝打版系統','紡織品物性測試儀']},
+  {id:4,name:'機械工程系',college:'工程學院',theme:'g',emoji:'⚙️',bldg:'⚙️',
+   desc:'精密加工、3D列印、智慧製造！機械人是工廠的靈魂，是工業4.0時代最搶手的人才。',
+   equip:['CNC精密五軸加工中心','金屬3D列印機','機器人手臂實驗室','逆向工程掃描設備']},
+  {id:5,name:'工商業設計系',college:'工程學院',theme:'g',emoji:'🎨',bldg:'🎨',
+   desc:'產品設計 × 品牌視覺 × UI/UX！在創客工坊把腦中想法變成真實產品，改變世界體驗。',
+   equip:['創客工坊Fablab','雷射切割機','UV全彩列印機','VR/AR設計體驗室']},
+  {id:6,name:'工業管理系',college:'醫護暨管理學院',theme:'m',emoji:'📊',bldg:'📊',
+   desc:'結合工程與管理，運用大數據與AI優化生產流程，榮獲勞動部最高肯定，就業表現卓越！',
+   equip:['智慧物流模擬系統','ERP企業資源規劃軟體','生產排程模擬實驗室','品質管制統計軟體']},
+  {id:7,name:'資訊管理系',college:'醫護暨管理學院',theme:'m',emoji:'💻',bldg:'💻',
+   desc:'AI、雲端運算、資安攻防！榮獲全國技能競賽雲端運算職類前四名，數位轉型時代最強科系。',
+   equip:['AI人工智慧實驗室','雲端運算實習平台','資安攻防演練環境','大數據分析工具']},
+  {id:8,name:'行銷與流通管理系',college:'醫護暨管理學院',theme:'m',emoji:'🛒',bldg:'🛒',
+   desc:'電商行銷、直播帶貨、供應鏈優化！在遠東集團體系中累積實戰經驗，把創意變商業價值。',
+   equip:['電商模擬實務平台','直播行銷工作室','消費者行為眼動儀','VR購物情境體驗室']},
+  {id:9,name:'醫務管理系',college:'醫護暨管理學院',theme:'m',emoji:'🏥',bldg:'🏥',
+   desc:'緊鄰亞東紀念醫院！學習醫院行政、健康資訊，擁有獲「未來科技獎」的沉浸式VR急救系統。',
+   equip:['沉浸式VR急救情境模擬','健康資訊實習平台','醫院作業模擬實驗室','亞東醫院實地實習']},
+  {id:10,name:'護理系',college:'醫護暨管理學院',theme:'m',emoji:'💊',bldg:'💊',
+   desc:'緊鄰亞東醫院的實習直通車！高規格護理實習大樓與SimMan高擬真模擬人，培育最強臨床護理師。',
+   equip:['高擬真護理實習中心','SimMan模擬人系統','產婦護理模擬設備','亞東醫院臨床實習']},
+  {id:11,name:'通識教育中心',college:'通識教育中心',theme:'t',emoji:'🌏',bldg:'📚',
+   desc:'外語、藝術、體育、人文素養一次到位！英語村浸濡式環境，成為有溫度、有視野的全方位人才。',
+   equip:['沉浸式英語村學習空間','多功能藝術展演廳','語言學習資源中心','跨文化交流課程']},
+];
+
+const COL={
+  e:{border:'#4A90E2',text:'#4A90E2',bg:'#EBF5FB',ribbon:'linear-gradient(90deg,#4A90E2,#74b9ff)'},
+  g:{border:'#27AE60',text:'#27AE60',bg:'#EAFAF1',ribbon:'linear-gradient(90deg,#27AE60,#55efc4)'},
+  m:{border:'#E74C3C',text:'#E74C3C',bg:'#FDEDEC',ribbon:'linear-gradient(90deg,#E74C3C,#ff7675)'},
+  t:{border:'#F39C12',text:'#F39C12',bg:'#FEF9E7',ribbon:'linear-gradient(90deg,#F39C12,#fdcb6e)'},
+};
+
+// Player config: avatar emoji, display name, CSS class
+const PLAYER_CFG=[
+  {avatar:'🔵',name:'玩家 1',cls:'mp-p0'},
+  {avatar:'🔴',name:'玩家 2',cls:'mp-p1'},
+  {avatar:'🟢',name:'玩家 3',cls:'mp-p2'},
+  {avatar:'🟡',name:'玩家 4',cls:'mp-p3'},
+];
+
+const LS_KEY='aeust_leaderboard_v2';
+
+/* ══════════════════════════════════════
+   AUDIO
+══════════════════════════════════════ */
+let audioCtx=null,soundOn=true;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
+function tone(freq,type,dur,gain,delay=0){
+  if(!soundOn)return;
+  try{
+    const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.type=type;o.frequency.setValueAtTime(freq,c.currentTime+delay);
+    g.gain.setValueAtTime(0,c.currentTime+delay);
+    g.gain.linearRampToValueAtTime(gain,c.currentTime+delay+.01);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+delay+dur);
+    o.start(c.currentTime+delay);o.stop(c.currentTime+delay+dur+.05);
+  }catch(e){}
+}
+const sfx={
+  flip:   ()=>tone(520,'sine',.12,.18),
+  match:  ()=>{tone(523,'triangle',.18,.22);tone(784,'triangle',.22,.22,.14);tone(1047,'triangle',.3,.2,.28)},
+  wrong:  ()=>{tone(200,'sawtooth',.18,.12);tone(160,'sawtooth',.12,.1,.1)},
+  unlock: ()=>[523,659,784,1047].forEach((f,i)=>tone(f,'sine',.22,.18,i*.07)),
+  done:   ()=>[523,659,784,659,784,1047].forEach((f,i)=>tone(f,'triangle',.28,.2,i*.1)),
+  turn:   ()=>{tone(440,'sine',.1,.15);tone(550,'sine',.12,.15,.1)},
+};
+function toggleSound(){
+  soundOn=!soundOn;
+  const b=document.getElementById('sound-btn');
+  b.textContent=soundOn?'🔊':'🔇';
+  b.classList.toggle('muted',!soundOn);
+}
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let selectedCollege=null;   // 'e'|'g'|'m'|'t'
+let gameMode=1;             // 1–4 players
+let flipped=[],matched=new Set();
+let moves=0,canFlip=true,timerInt=null,elapsed=0;
+let popupQueue=[],showingPopup=false,gameComplete=false;
+let lbSortMode='time';
+
+// Multi-player state
+let mpNumPlayers=1;
+let mpCurrentPlayer=0;      // index of current player
+let mpScores=[];            // [pts, pts, pts, pts]
+let mpStreaks=[];            // consecutive matches per player
+
+/* ══════════════════════════════════════
+   FLOATERS
+══════════════════════════════════════ */
+['🎓','⚡','🔬','💻','👗','⚙️','📡','💊','📊','🏥','🎨','🌏','🔌','📚'].forEach((e,i)=>{
+  const d=document.createElement('div');
+  d.className='floater';d.textContent=e;
+  d.style.left=(Math.random()*95)+'%';
+  d.style.animationDelay=(i*1.1)+'s';
+  d.style.animationDuration=(9+Math.random()*6)+'s';
+  document.getElementById('floaters').appendChild(d);
+});
+
+/* ══════════════════════════════════════
+   WELCOME PICKS
+══════════════════════════════════════ */
+function pickCollege(el){
+  document.querySelectorAll('.cp-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedCollege=el.dataset.college;
+  checkCanStart();
+}
+function pickMode(el){
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  gameMode=parseInt(el.dataset.mode);
+  checkCanStart();
+}
+function checkCanStart(){
+  document.getElementById('btn-start').disabled=!(selectedCollege&&gameMode);
+}
+
+/* ══════════════════════════════════════
+   START
+══════════════════════════════════════ */
+function startGame(){
+  mpNumPlayers=gameMode;
+  mpCurrentPlayer=0;
+  mpScores=Array(mpNumPlayers).fill(0);
+  mpStreaks=Array(mpNumPlayers).fill(0);
+
+  // 先偵測版面方向，再切換畫面
+  const isLandscape = window.innerWidth > window.innerHeight;
+  currentOrient = isLandscape ? 'landscape' : 'portrait';
+  document.body.classList.toggle('landscape', isLandscape);
+
+  showScreen('screen-game');
+  buildBoard();
+
+  if(mpNumPlayers===1){
+    startTimer();
+    document.getElementById('mp-scores').style.display='none';
+    document.getElementById('s-moves-wrap').style.display='';
+    document.getElementById('s-timer').style.display='';
+    document.getElementById('game-hint').textContent='找出兩張相同的圖案牌 → 解鎖該系介紹 ✨';
+    document.getElementById('game-logo').textContent='🏫 亞東科大 單人挑戰';
+  } else {
+    clearInterval(timerInt);
+    document.getElementById('s-timer').style.display='none';
+    document.getElementById('s-moves-wrap').style.display='none';
+    buildMpScoreboard();
+    document.getElementById('mp-scores').style.display='flex';
+    document.getElementById('game-logo').textContent=`🏫 亞東科大 ${mpNumPlayers}人對戰`;
+    setTimeout(()=>showTurnAnnounce(0, true),400);
+  }
+
+  // DOM 渲染完成後才能量測真實高度，requestAnimationFrame 確保已 paint
+  requestAnimationFrame(()=>requestAnimationFrame(computeCardSize));
+}
+
+/* ══════════════════════════════════════
+   BUILD BOARD
+══════════════════════════════════════ */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+function buildBoard(){
+  const board=document.getElementById('board');
+  board.innerHTML='';
+  flipped=[];matched=new Set();moves=0;canFlip=true;elapsed=0;
+  popupQueue=[];showingPopup=false;gameComplete=false;
+  document.getElementById('campus').innerHTML='<div class="campus-empty" id="campus-empty">🏫</div>';
+  document.getElementById('prog-bar').style.width='0%';
+  document.getElementById('prog-pct').textContent='0%';
+  document.getElementById('s-pairs').textContent='0';
+  document.getElementById('s-moves').textContent='0';
+  updateTabs(0);
+
+  let cards=[];
+  DEPTS.forEach(d=>{cards.push({deptId:d.id,dept:d});cards.push({deptId:d.id,dept:d});});
+  cards=shuffle(cards);
+  cards.forEach(data=>{
+    const el=document.createElement('div');
+    el.className=`mcard theme-${data.dept.theme}`;
+    el.innerHTML=`
+      <div class="cface cback"><span class="cback-star">⭐</span><div class="cback-shine"></div></div>
+      <div class="cface cfront">
+        <span class="cfront-emoji">${data.dept.emoji}</span>
+        <span class="cfront-label">${data.dept.name}</span>
+      </div>`;
+    el.addEventListener('click',()=>onCardClick(el,data));
+    board.appendChild(el);
+  });
+}
+
+/* ══════════════════════════════════════
+   MULTI-PLAYER SCOREBOARD UI
+══════════════════════════════════════ */
+function buildMpScoreboard(){
+  const wrap=document.getElementById('mp-scores');
+  wrap.innerHTML='';
+  for(let i=0;i<mpNumPlayers;i++){
+    const cfg=PLAYER_CFG[i];
+    const div=document.createElement('div');
+    div.className=`mp-player ${cfg.cls}`;
+    div.id=`mp-player-${i}`;
+    div.innerHTML=`
+      <div class="mp-avatar">${cfg.avatar}</div>
+      <div class="mp-pname">${cfg.name}</div>
+      <div class="mp-score" id="mp-score-${i}">0</div>
+      <div class="mp-score-lab">配對分數</div>
+      <div class="mp-streak" id="mp-streak-${i}"></div>`;
+    wrap.appendChild(div);
+  }
+  updateMpActive();
+}
+function updateMpActive(){
+  for(let i=0;i<mpNumPlayers;i++){
+    const el=document.getElementById(`mp-player-${i}`);
+    if(el) el.classList.toggle('active-turn',i===mpCurrentPlayer);
+  }
+}
+function updateMpScore(playerIdx){
+  const el=document.getElementById(`mp-score-${playerIdx}`);
+  if(el) el.textContent=mpScores[playerIdx];
+  const streak=mpStreaks[playerIdx];
+  const se=document.getElementById(`mp-streak-${playerIdx}`);
+  if(se) se.textContent=streak>=2?`🔥 連續 ${streak} 組！`:'';
+}
+
+/* ══════════════════════════════════════
+   TURN ANNOUNCE
+══════════════════════════════════════ */
+function showTurnAnnounce(playerIdx, isFirst=false){
+  const cfg=PLAYER_CFG[playerIdx];
+  const el=document.getElementById('turn-announce');
+  document.getElementById('ann-avatar').textContent=cfg.avatar;
+  document.getElementById('ann-text').textContent=isFirst?'遊戲開始！':'換你了！';
+  document.getElementById('ann-sub').textContent=cfg.name+' 請翻牌';
+  el.classList.remove('hide');
+  el.classList.add('show');
+  setTimeout(()=>{
+    el.classList.remove('show');
+    el.classList.add('hide');
+    setTimeout(()=>el.classList.remove('hide'),350);
+  },1400);
+}
+
+/* ══════════════════════════════════════
+   CARD CLICK  (handles both solo and multi)
+══════════════════════════════════════ */
+function onCardClick(el,data){
+  if(!canFlip||el.classList.contains('flipped')||el.classList.contains('matched'))return;
+  sfx.flip();
+  el.classList.add('flipped');
+  flipped.push({el,deptId:data.deptId,dept:data.dept});
+  if(flipped.length<2)return;
+
+  canFlip=false;
+  moves++;
+  document.getElementById('s-moves').textContent=moves;
+  const[a,b]=flipped;
+
+  if(a.deptId===b.deptId){
+    // ✅ MATCH
+    sfx.match();
+    setTimeout(()=>{
+      const owner=mpNumPlayers>1?mpCurrentPlayer:0;
+      a.el.classList.add('matched',`own-p${owner}`);
+      b.el.classList.add('matched',`own-p${owner}`);
+      matched.add(a.deptId);
+      document.getElementById('s-pairs').textContent=matched.size;
+      updateProgress();
+      updateTabs(matched.size);
+      addBuilding(a.dept);
+      
+      if(mpNumPlayers>1){
+        mpScores[mpCurrentPlayer]++;
+        mpStreaks[mpCurrentPlayer]++;
+        // reset other players' streaks
+        for(let i=0;i<mpNumPlayers;i++) if(i!==mpCurrentPlayer) mpStreaks[i]=0;
+        updateMpScore(mpCurrentPlayer);
+        scoreFlash(`${PLAYER_CFG[mpCurrentPlayer].avatar} +1 分！`);
+        sfx.unlock();
+        queuePopup(a.dept);
+        flipped=[];
+        // match → same player continues (no turn change)
+        if(matched.size===12){clearInterval(timerInt);gameComplete=true;}
+        // canFlip restored by popup queue
+      } else {
+        scoreFlash('🎉 +1 解鎖！');
+        sfx.unlock();
+        queuePopup(a.dept);
+        flipped=[];
+        if(matched.size===12){clearInterval(timerInt);gameComplete=true;}
+      }
+    },300);
+
+  } else {
+    // ❌ NO MATCH
+    sfx.wrong();
+    a.el.classList.add('wrong-shake');
+    b.el.classList.add('wrong-shake');
+    setTimeout(()=>{
+      a.el.classList.remove('flipped','wrong-shake');
+      b.el.classList.remove('flipped','wrong-shake');
+      flipped=[];
+
+      if(mpNumPlayers>1){
+        mpStreaks[mpCurrentPlayer]=0;
+        updateMpScore(mpCurrentPlayer);
+        // advance to next player
+        mpCurrentPlayer=(mpCurrentPlayer+1)%mpNumPlayers;
+        updateMpActive();
+        showTurnAnnounce(mpCurrentPlayer);
+        setTimeout(()=>{canFlip=true;},1500);
+      } else {
+        canFlip=true;
+      }
+    },750);
+  }
+}
+
+/* ══════════════════════════════════════
+   PROGRESS & TABS
+══════════════════════════════════════ */
+function updateProgress(){
+  const pct=Math.round((matched.size/12)*100);
+  document.getElementById('prog-bar').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+}
+function updateTabs(n){
+  const thr={e:0,g:3,m:6,t:11},done={e:3,g:6,m:11,t:12};
+  ['e','g','m','t'].forEach(k=>{
+    const el=document.getElementById('ctab-'+k);
+    el.classList.remove('locked','done');
+    if(n<thr[k])el.classList.add('locked');
+    else if(n>=done[k])el.classList.add('done');
+  });
+}
+
+/* ══════════════════════════════════════
+   CAMPUS
+══════════════════════════════════════ */
+function addBuilding(dept){
+  const campus=document.getElementById('campus');
+  const empty=document.getElementById('campus-empty');
+  if(empty)empty.remove();
+  const b=document.createElement('div');
+  b.className='bldg';
+  b.innerHTML=`<span class="bldg-icon">${dept.bldg}</span><div class="bldg-name">${dept.name}</div>`;
+  campus.appendChild(b);
+}
+
+/* ══════════════════════════════════════
+   SCORE FLASH
+══════════════════════════════════════ */
+function scoreFlash(msg){
+  const el=document.createElement('div');
+  el.className='score-flash';el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),920);
+}
+
+/* ══════════════════════════════════════
+   POPUP QUEUE
+   canFlip management:
+   - Always false while popup shown
+   - Restored when queue empty (solo: immediately, multi: after turn announce)
+══════════════════════════════════════ */
+function queuePopup(dept){popupQueue.push(dept);if(!showingPopup)nextPopup();}
+function nextPopup(){
+  if(popupQueue.length===0){
+    showingPopup=false;
+    if(gameComplete){
+      if(mpNumPlayers===1) setTimeout(showSoloResult,500);
+      else setTimeout(showMpResult,600);
+    } else {
+      canFlip=true; // safe to flip again
+    }
+    return;
+  }
+  showingPopup=true;canFlip=false;
+  renderPopup(popupQueue.shift());
+}
+function closePopup(){
+  document.getElementById('popup-overlay').classList.remove('show');
+  setTimeout(nextPopup,180);
+}
+function renderPopup(dept){
+  const c=COL[dept.theme];
+  document.getElementById('pop-icon').textContent=dept.emoji;
+  document.getElementById('pop-name').textContent=dept.name;
+  const badge=document.getElementById('pop-badge');
+  badge.textContent=dept.college;badge.style.background=c.bg;badge.style.color=c.text;badge.style.border='2px solid '+c.border;
+  document.getElementById('pop-desc').textContent=dept.desc;
+  document.getElementById('pop-equip-title').style.color=c.text;
+  document.getElementById('pop-equip-list').innerHTML=dept.equip.map(e=>'• '+e).join('<br>');
+  document.getElementById('pop-equip').style.borderColor=c.border;
+  document.getElementById('popup-ribbon').style.background=c.ribbon;
+  spawnConfetti();
+  document.getElementById('popup-overlay').classList.add('show');
+}
+function spawnConfetti(){
+  const zone=document.getElementById('confetti-zone');zone.innerHTML='';
+  const cols=['#667eea','#f093fb','#FFD700','#ff6b6b','#51cf66','#74c0fc','#ff9f43','#a29bfe'];
+  for(let i=0;i<28;i++){
+    const d=document.createElement('div');d.className='cdot';
+    const sz=5+Math.random()*9;
+    d.style.cssText=`width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random()*cols.length)]};left:${Math.random()*100}%;animation-duration:${.65+Math.random()*.75}s;animation-delay:${Math.random()*.35}s;`;
+    zone.appendChild(d);
+  }
+}
+
+/* ══════════════════════════════════════
+   TIMER (solo only)
+══════════════════════════════════════ */
+function startTimer(){
+  elapsed=0;clearInterval(timerInt);
+  timerInt=setInterval(()=>{
+    elapsed++;
+    const m=String(Math.floor(elapsed/60)).padStart(2,'0');
+    const s=String(elapsed%60).padStart(2,'0');
+    document.getElementById('s-timer').textContent=`⏱ ${m}:${s}`;
+  },1000);
+}
+
+/* ══════════════════════════════════════
+   SOLO RESULT
+══════════════════════════════════════ */
+function showSoloResult(){
+  sfx.done();
+  showScreen('screen-result');
+  const m=String(Math.floor(elapsed/60)).padStart(2,'0');
+  const s=String(elapsed%60).padStart(2,'0');
+  document.getElementById('res-moves').textContent=moves;
+  document.getElementById('res-time').textContent=`${m}:${s}`;
+  const lb=loadLb();
+  const rank=lb.filter(r=>r.elapsed<elapsed).length+1;
+  document.getElementById('res-rank-preview').textContent='#'+rank;
+  ['f-name','f-school','f-dept','f-email'].forEach(id=>{
+    document.getElementById(id).value='';
+    document.getElementById(id).classList.remove('error');
+  });
+  ['e-name','e-school','e-dept','e-email'].forEach(id=>document.getElementById(id).textContent='');
+  document.getElementById('btn-submit').disabled=false;
+  document.getElementById('btn-submit').textContent='🏆 提交成績，上榜英雄！';
+}
+
+/* ══════════════════════════════════════
+   MULTI-PLAYER RESULT
+══════════════════════════════════════ */
+function showMpResult(){
+  sfx.done();
+  // sort players by score desc
+  const sorted=[...Array(mpNumPlayers).keys()].sort((a,b)=>mpScores[b]-mpScores[a]);
+  const winner=sorted[0];
+  const cfg=PLAYER_CFG[winner];
+  const podiumColors=[
+    {border:'#FFD700',bg:'linear-gradient(135deg,#fff9e6,#fff3cc)',medal:'🥇'},
+    {border:'#c0c0c0',bg:'linear-gradient(135deg,#f5f5f5,#e8e8e8)',medal:'🥈'},
+    {border:'#cd7f32',bg:'linear-gradient(135deg,#fff0eb,#ffe5d5)',medal:'🥉'},
+    {border:'#a0aec0',bg:'linear-gradient(135deg,#f7fafc,#edf2f7)',medal:'4️⃣'},
+  ];
+  // header gradient by winner's colour
+  const winCls=['#667eea','#e74c3c','#27ae60','#f39c12'];
+  const hdr=document.getElementById('mp-result-header');
+  hdr.style.background=`linear-gradient(135deg,${winCls[winner]},${winCls[winner]}cc)`;
+  document.querySelector('.mp-result-title').textContent=`${cfg.avatar} ${cfg.name} 獲勝！`;
+
+  const podium=document.getElementById('mp-podium');
+  podium.innerHTML=sorted.map((pi,rank)=>{
+    const pc=podiumColors[rank];
+    const pcfg=PLAYER_CFG[pi];
+    return`<div class="mp-podium-row" style="border-color:${pc.border};background:${pc.bg}">
+      <div class="mp-podium-rank">${pc.medal}</div>
+      <div class="mp-podium-info">
+        <div class="mp-podium-name" style="color:${winCls[pi]}">${pcfg.avatar} ${pcfg.name}</div>
+        <div class="mp-podium-detail">配對了 ${mpScores[pi]} 組系所</div>
+      </div>
+      <div class="mp-podium-pts" style="color:${winCls[pi]}">${mpScores[pi]} 分</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('mp-result-overlay').classList.add('show');
+}
+
+function mpPlayAgain(){
+  document.getElementById('mp-result-overlay').classList.remove('show');
+  startGame();
+}
+function mpGoHome(){
+  document.getElementById('mp-result-overlay').classList.remove('show');
+  goPlayAgain();
+}
+
+/* ══════════════════════════════════════
+   LEADERBOARD
+══════════════════════════════════════ */
+function loadLb(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e){return[];}}
+function saveLb(data){try{localStorage.setItem(LS_KEY,JSON.stringify(data));}catch(e){}}
+function maskName(name){
+  // 姓（第一字）顯示，名字每個字以○代替
+  if(!name||name.length===0)return'○';
+  if(name.length===1)return name;
+  // 姓 + 名字字數個圈
+  return name[0]+'○'.repeat(name.length-1);
+}
+function maskEmail(email){
+  if(!email||!email.includes('@'))return'****@****';
+  const[user,domain]=email.split('@');
+  const mu=user[0]+(user.length>2?'*'.repeat(Math.min(user.length-2,6)):'')+( user.length>1?user[user.length-1]:'');
+  const dp=domain.split('.');
+  return mu+'@****.'+dp[dp.length-1];
+}
+function fmtTime(sec){return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}
+
+function submitScore(){
+  const name=document.getElementById('f-name').value.trim();
+  const school=document.getElementById('f-school').value.trim();
+  const dept=document.getElementById('f-dept').value.trim();
+  const email=document.getElementById('f-email').value.trim();
+  let valid=true;
+  const chk=(v,fi,ei,msg)=>{
+    if(!v){document.getElementById(fi).classList.add('error');document.getElementById(ei).textContent=msg;valid=false;}
+    else{document.getElementById(fi).classList.remove('error');document.getElementById(ei).textContent='';}
+  };
+  chk(name,'f-name','e-name','請輸入姓名');
+  chk(school,'f-school','e-school','請輸入學校名稱');
+  chk(dept,'f-dept','e-dept','請輸入科別名稱');
+  const emailOk=email&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if(!emailOk){document.getElementById('f-email').classList.add('error');document.getElementById('e-email').textContent='請輸入有效的電子郵件';valid=false;}
+  else{document.getElementById('f-email').classList.remove('error');document.getElementById('e-email').textContent='';}
+  if(!valid)return;
+  const lb=loadLb();
+  lb.push({name,school,dept,email,elapsed,moves,ts:Date.now(),_id:Date.now()+Math.random()});
+  lb.sort((a,b)=>a.elapsed-b.elapsed||a.moves-b.moves);
+  if(lb.length>200)lb.length=200;
+  saveLb(lb);
+  document.getElementById('btn-submit').disabled=true;
+  document.getElementById('btn-submit').textContent='✅ 已成功上榜！';
+  setTimeout(()=>showWelcomeSplash(),600);
+}
+function skipToLb(){showLb();}
+
+/* ── 排行榜管理（危險操作區） ──────────────────── */
+let _delConfirmCb = null;
+
+function toggleDangerZone(){
+  const panel  = document.getElementById('lb-danger-panel');
+  const toggle = document.getElementById('lb-danger-toggle');
+  const open   = panel.classList.toggle('open');
+  toggle.textContent = open ? '▲ 收起' : '⚙ 管理資料';
+}
+
+function openDlConfirm(icon, title, sub, onOk){
+  document.getElementById('del-confirm-icon').textContent  = icon;
+  document.getElementById('del-confirm-title').textContent = title;
+  document.getElementById('del-confirm-sub').textContent   = sub;
+  _delConfirmCb = onOk;
+  document.getElementById('del-confirm-overlay').classList.add('show');
+}
+function closeDlConfirm(){
+  document.getElementById('del-confirm-overlay').classList.remove('show');
+  _delConfirmCb = null;
+}
+function execDlConfirm(){
+  if(_delConfirmCb) _delConfirmCb();
+  closeDlConfirm();
+}
+
+// 清空全部
+function confirmClearAll(){
+  const lb = loadLb();
+  if(lb.length===0){ alert('排行榜目前沒有任何資料。'); return; }
+  openDlConfirm(
+    '⚠️',
+    '清空全部排行榜資料？',
+    `即將永久刪除全部 ${lb.length} 筆成績，此操作無法復原。`,
+    ()=>{ saveLb([]); renderLb();
+          // 清空後收合危險區
+          document.getElementById('lb-danger-panel').classList.remove('open');
+          document.getElementById('lb-danger-toggle').textContent='⚙ 管理資料';
+        }
+  );
+}
+
+/* ══════════════════════════════════════
+   WELCOME SPLASH
+══════════════════════════════════════ */
+function showWelcomeSplash(){
+  const splash=document.getElementById('welcome-splash');
+  splash.classList.add('show');
+  spawnSplashConfetti();
+  spawnSplashStars();
+}
+function closeSplash(){
+  document.getElementById('welcome-splash').classList.remove('show');
+  showLb();
+}
+function spawnSplashConfetti(){
+  const wrap=document.getElementById('splash-confetti-wrap');
+  wrap.innerHTML='';
+  const cols=['#FFD700','#f093fb','#667eea','#ff6b6b','#51cf66','#74c0fc','#ff9f43','#a29bfe','#ffffff'];
+  for(let i=0;i<90;i++){
+    const d=document.createElement('div');
+    d.className='splash-confetti-dot';
+    const sz=4+Math.random()*10;
+    const dur=2.5+Math.random()*3;
+    const delay=Math.random()*2.5;
+    d.style.cssText=`
+      width:${sz}px;height:${sz}px;
+      background:${cols[Math.floor(Math.random()*cols.length)]};
+      left:${Math.random()*100}%;top:-20px;
+      animation-duration:${dur}s;
+      animation-delay:${delay}s;
+      border-radius:${Math.random()>.5?'50%':'3px'};
+    `;
+    wrap.appendChild(d);
+  }
+}
+function spawnSplashStars(){
+  const wrap=document.getElementById('splash-stars');
+  wrap.innerHTML='';
+  const emojis=['⭐','🌟','✨','💫','🎊','🎉','🏫','🎓'];
+  for(let i=0;i<16;i++){
+    const s=document.createElement('span');
+    s.className='splash-star';
+    const tx=(Math.random()-0.5)*600;
+    const ty=-(150+Math.random()*400);
+    const delay=Math.random()*1.5;
+    s.style.cssText=`
+      left:${20+Math.random()*60}%;
+      top:50%;
+      --tx:${tx}px;--ty:${ty}px;
+      animation-delay:${delay}s;
+      font-size:${1.5+Math.random()*1.5}rem;
+    `;
+    s.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    wrap.appendChild(s);
+  }
+}
+
+/* ══════════════════════════════════════
+   EXPORT EXCEL  (SheetJS)
+══════════════════════════════════════ */
+function exportExcel(){
+  const lb=loadLb();
+  if(lb.length===0){
+    alert('目前排行榜沒有資料，請先完成單人挑戰並登錄成績！');
+    return;
+  }
+
+  // Sort by time asc
+  const rows=[...lb].sort((a,b)=>a.elapsed-b.elapsed||a.moves-b.moves);
+
+  // Build worksheet data
+  const wsData=[];
+
+  // Title rows
+  wsData.push(['亞東科技大學 校園探索大冒險 — 單人挑戰成績表']);
+  wsData.push([`匯出時間：${new Date().toLocaleString('zh-TW',{timeZone:'Asia/Taipei'})}`]);
+  wsData.push([`總挑戰人數：${rows.length} 人`]);
+  wsData.push([]);  // blank row
+
+  // Header
+  wsData.push(['名次','姓名','就讀高中職','科別','電子郵件','完成時間','翻牌次數','對戰日期','對戰時間']);
+
+  // Data rows
+  rows.forEach((r,i)=>{
+    const d=new Date(r.ts);
+    const dateStr=d.toLocaleDateString('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'});
+    const timeStr=d.toLocaleTimeString('zh-TW',{timeZone:'Asia/Taipei',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+    wsData.push([
+      i+1,
+      r.name,
+      r.school,
+      r.dept,
+      r.email,
+      fmtTime(r.elapsed),
+      r.moves,
+      dateStr,
+      timeStr,
+    ]);
+  });
+
+  // Stats rows
+  wsData.push([]);
+  wsData.push(['統計資訊']);
+  const times=rows.map(r=>r.elapsed);
+  const minT=Math.min(...times), maxT=Math.max(...times), avgT=Math.round(times.reduce((a,b)=>a+b,0)/times.length);
+  const allMoves=rows.map(r=>r.moves);
+  wsData.push(['最快完成',fmtTime(minT),'最慢完成',fmtTime(maxT),'平均用時',fmtTime(avgT)]);
+  wsData.push(['最少翻牌',Math.min(...allMoves)+'次','最多翻牌',Math.max(...allMoves)+'次','平均翻牌',Math.round(allMoves.reduce((a,b)=>a+b,0)/allMoves.length)+'次']);
+
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(wsData);
+
+  // Column widths
+  ws['!cols']=[
+    {wch:6},{wch:12},{wch:20},{wch:14},{wch:28},
+    {wch:10},{wch:10},{wch:14},{wch:12}
+  ];
+
+  // Merge title cell A1
+  ws['!merges']=[
+    {s:{r:0,c:0},e:{r:0,c:8}},
+    {s:{r:1,c:0},e:{r:1,c:8}},
+    {s:{r:2,c:0},e:{r:2,c:8}},
+  ];
+
+  XLSX.utils.book_append_sheet(wb,ws,'單人挑戰排行榜');
+
+  const now=new Date();
+  const fname=`亞東科大_校園探索_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.xlsx`;
+  XLSX.writeFile(wb,fname);
+}
+
+function showLb(){showScreen('screen-lb');renderLb();}
+function sortLb(mode){
+  lbSortMode=mode;
+  document.querySelectorAll('.lb-nav-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&mode==='time')||(i===1&&mode==='moves')));
+  renderLb();
+}
+function renderLb(){
+  const lb=loadLb();
+  let rows=[...lb];
+  if(lbSortMode==='moves') rows.sort((a,b)=>a.moves-b.moves||a.elapsed-b.elapsed);
+  else rows.sort((a,b)=>a.elapsed-b.elapsed||a.moves-b.moves);
+  document.getElementById('lb-count').textContent=`共 ${rows.length} 位挑戰者`;
+  const tbody=document.getElementById('lb-tbody');
+  const empty=document.getElementById('lb-empty');
+  if(rows.length===0){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  const medals=['🥇','🥈','🥉'];
+  const rowCls=['top1','top2','top3'];
+  tbody.innerHTML=rows.map((r,i)=>{
+    const rank=i+1;
+    const rb=rank<=3?`<div class="rank-badge rank-${rank}">${medals[rank-1]}</div>`:`<div class="rank-badge rank-n">#${rank}</div>`;
+    return`<tr class="lb-row ${rank<=3?rowCls[rank-1]:''}">
+      <td>${rb}</td>
+      <td>
+        <div class="lb-name">${maskName(r.name)}</div>
+        <div class="lb-school">${r.school} · <span class="lb-dept-tag">${r.dept}</span></div>
+        <div style="font-size:.66rem;color:#b0b8c8;margin-top:1px">${maskEmail(r.email)}</div>
+      </td>
+      <td><div class="time-val">${fmtTime(r.elapsed)}</div></td>
+      <td><div class="moves-val">${r.moves} 次</div></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════
+   版面自動偵測 + 牌格尺寸計算
+   ──────────────────────────────────────
+   核心邏輯：
+   1. 依螢幕寬高比自動選擇直式 / 橫式
+   2. 量測遊戲畫面可用像素（扣除 topbar、padding、其他 UI）
+   3. 計算每張牌最大尺寸，設定 CSS 變數 --card-size
+   4. 依牌格大小推算 emoji 與文字大小
+   5. 視窗 resize 時重算
+══════════════════════════════════════ */
+let currentOrient = 'portrait';
+
+function detectAndApplyLayout(){
+  const isLandscape = window.innerWidth > window.innerHeight;
+  const newOrient = isLandscape ? 'landscape' : 'portrait';
+  if(newOrient !== currentOrient){
+    currentOrient = newOrient;
+    document.body.classList.toggle('landscape', isLandscape);
+  }
+  // 只在遊戲畫面計算牌格大小
+  const gameEl = document.getElementById('screen-game');
+  if(!gameEl || !gameEl.classList.contains('active')) return;
+  computeCardSize();
+}
+
+function computeCardSize(){
+  const isLand = currentOrient === 'landscape';
+
+  // 直式：6欄 × 4列，牌盤上，校園下
+  // 橫式：6欄 × 4列，牌盤左 3/4，校園右 1/4
+  const COLS = 6;
+  const ROWS = 4;
+  const GAP  = 5; // px
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  // ── 量測固定 UI 元素高度 ────────────────────────────
+  const topbar   = document.querySelector('.game-topbar');
+  const progress = document.querySelector('.progress-wrap');
+  const mpScores = document.getElementById('mp-scores');
+  const tabs     = document.querySelector('.college-tabs');
+  const cancel   = document.querySelector('.game-cancel-wrap');
+  function elH(el){
+    if(!el) return 0;
+    const mb = parseFloat(getComputedStyle(el).marginBottom)||0;
+    return el.offsetHeight > 0 ? el.offsetHeight + mb : 0;
+  }
+
+  const SCREEN_PAD = 16; // #screen-game padding 8px×2
+  const BODY_PAD   = 20; // .game-body padding top+bottom
+  const BORDER_OH  = 4;  // glass border/shadow overhead
+
+  const fixedH = (topbar ? topbar.offsetHeight : 40)
+               + BODY_PAD
+               + elH(progress)
+               + (mpScores && mpScores.style.display !== 'none' ? elH(mpScores) : 0)
+               + 10; // game-layout gap + safety
+  // 注意：橫式時 college-tabs 和 cancel 在 campus-wrap 左欄內，不佔 fixedH
+  // 直式時 college-tabs 和 cancel 也在 campus-wrap 內，計入下方 campusH
+
+  const availH = vh - SCREEN_PAD - BORDER_OH - fixedH;
+
+  // ── 可用總寬（扣除螢幕 padding 和 glass body lr padding）
+  const BODY_LR = 24; // game-body left+right padding 12px×2
+  const totalW  = vw - SCREEN_PAD - BORDER_OH - BODY_LR;
+
+  let boardW, boardH;
+
+  if(isLand){
+    // 橫式：校園佔左 1/3，牌盤佔右 2/3
+    const CAMPUS_RATIO = 1/3;
+    const LAYOUT_GAP   = 12;
+    const campusPx = Math.floor(totalW * CAMPUS_RATIO);
+    boardW = totalW - campusPx - LAYOUT_GAP;
+    boardH = availH;
+
+    // 設定 campus-wrap 寬度
+    const campusWrap = document.getElementById('side-col');
+    if(campusWrap){
+      campusWrap.style.width      = campusPx + 'px';
+      campusWrap.style.flexShrink = '0';
+    }
+  } else {
+    const campusH = 80 + elH(tabs) + elH(cancel) + 30; // campus本體+標籤+放棄鍵+gaps
+    boardW = totalW;
+    boardH = availH - campusH - 8;
+
+    // 直式：清除 campus-wrap 的 inline style
+    const campusWrap = document.getElementById('side-col');
+    if(campusWrap){
+      campusWrap.style.width      = '';
+      campusWrap.style.flexShrink = '';
+    }
+  }
+
+  // 每張牌尺寸：取寬度與高度計算值的最小值，確保 24 張全在畫面內
+  const sizeByW = Math.floor((boardW - GAP * (COLS - 1)) / COLS);
+  const sizeByH = Math.floor((boardH - GAP * (ROWS - 1)) / ROWS);
+  const cardSize = Math.max(36, Math.min(sizeByW, sizeByH));
+
+  // 字型等比縮放（絕不截斷）
+  const emojiPx = Math.max(11, Math.floor(cardSize * 0.33));
+  const textPx  = Math.max(7,  Math.floor(cardSize * 0.17));
+
+  // ── 寫入 CSS 變數 ──────────────────────────────────
+  const root = document.documentElement;
+  root.style.setProperty('--card-size',  cardSize + 'px');
+  root.style.setProperty('--card-gap',   GAP + 'px');
+  root.style.setProperty('--card-emoji', emojiPx + 'px');
+  root.style.setProperty('--card-text',  textPx + 'px');
+
+  // ── 設定 board grid ────────────────────────────────
+  const board = document.getElementById('board');
+  if(board){
+    board.style.gridTemplateColumns = `repeat(${COLS}, ${cardSize}px)`;
+    board.style.gridTemplateRows    = `repeat(${ROWS}, ${cardSize}px)`;
+  }
+}
+
+// 視窗 resize 重算
+let resizeTimer;
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(detectAndApplyLayout, 80);
+});
+
+// 首次偵測（DOMContentLoaded 時）
+document.addEventListener('DOMContentLoaded', detectAndApplyLayout);
+
+/* 舊 setOrient 保留空殼（避免 HTML 殘留 onclick 出錯）*/
+function setOrient(mode){ /* 已廢棄，由自動偵測取代 */ }
+function applyOrientLayout(){ detectAndApplyLayout(); }
+
+/* ══════════════════════════════════════
+   CANCEL GAME
+══════════════════════════════════════ */
+function confirmCancelGame(){
+  document.getElementById('confirm-overlay').classList.add('show');
+}
+function closeConfirm(){
+  document.getElementById('confirm-overlay').classList.remove('show');
+}
+function doCancelGame(){
+  // stop timer, clear state
+  clearInterval(timerInt);
+  document.getElementById('confirm-overlay').classList.remove('show');
+  // close any open popup
+  document.getElementById('popup-overlay').classList.remove('show');
+  document.getElementById('mp-result-overlay').classList.remove('show');
+  // reset layout back to portrait default before going home
+  applyOrientLayout();
+  goPlayAgain();
+}
+
+/* ══════════════════════════════════════
+   NAV HELPERS
+══════════════════════════════════════ */
+function goPlayAgain(){
+  document.querySelectorAll('.cp-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('btn-start').disabled=true;
+  selectedCollege=null;gameMode=1;
+  showScreen('screen-welcome');
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(id);el.classList.add('active');
+  const g=el.querySelector('.glass');
+  if(g){g.style.animation='none';g.offsetHeight;g.style.animation='';}
+  window.scrollTo(0,0);
+  if(id==='screen-lb')renderLb();
+}
+</script>
+</body>
+</html>
