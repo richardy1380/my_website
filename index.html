@@ -414,8 +414,110 @@ body.landscape .bldg-name{font-size:.44rem;max-width:44px}
 @keyframes cdotFall{from{transform:translateY(0) rotate(0) scale(1);opacity:1}to{transform:translateY(230px) rotate(720deg) scale(.2);opacity:0}}
 
 /* ── SCORE FLASH ── */
-.score-flash{position:fixed;top:18px;right:18px;z-index:300;background:linear-gradient(135deg,#FFD700,#FFA000);color:#7B5E00;font-size:.95rem;font-weight:900;padding:8px 18px;border-radius:50px;box-shadow:0 5px 18px rgba(255,165,0,.4);animation:sFlash .85s ease forwards;pointer-events:none}
-@keyframes sFlash{0%{transform:translateY(-18px);opacity:0}18%{transform:translateY(0);opacity:1}72%{transform:translateY(0);opacity:1}100%{transform:translateY(-18px);opacity:0}}
+.score-flash{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.5);
+  z-index:8000;pointer-events:none;
+  background:linear-gradient(135deg,#FFD700,#FFA000);
+  color:#5a3e00;font-size:1.4rem;font-weight:900;
+  padding:14px 32px;border-radius:60px;
+  box-shadow:0 10px 40px rgba(255,165,0,.55);
+  animation:sFlash 1.1s cubic-bezier(.175,.885,.32,1.275) forwards;
+  white-space:nowrap;text-align:center;
+}
+.score-flash.triple{
+  background:linear-gradient(135deg,#ff4500,#ff6b35,#ff9500);
+  color:white;font-size:1.8rem;
+  box-shadow:0 12px 48px rgba(255,69,0,.6);
+  padding:18px 40px;
+}
+@keyframes sFlash{
+  0%  {transform:translate(-50%,-50%) scale(0.4);opacity:0}
+  25% {transform:translate(-50%,-50%) scale(1.1);opacity:1}
+  60% {transform:translate(-50%,-50%) scale(1);opacity:1}
+  100%{transform:translate(-50%,-65%) scale(0.85);opacity:0}
+}
+
+/* ── STEP 3：各玩家選志願系別 ── */
+.step3-section{margin-bottom:18px}
+.step3-player-block{
+  background:#f8faff;border:1.5px solid #e2e8f0;border-radius:14px;
+  padding:10px 12px;margin-bottom:8px;
+}
+.step3-player-label{
+  font-size:.76rem;font-weight:900;color:#4a5568;
+  display:flex;align-items:center;gap:6px;margin-bottom:8px;
+}
+.step3-dept-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:5px;
+}
+@media(min-width:540px){.step3-dept-grid{grid-template-columns:repeat(6,1fr)}}
+@media(min-width:720px){.step3-dept-grid{grid-template-columns:repeat(12,1fr)}}
+.s3btn{
+  border:1.5px solid #e2e8f0;border-radius:9px;
+  padding:5px 3px;text-align:center;cursor:pointer;
+  background:#fff;transition:all .16s;user-select:none;
+  font-family:'Noto Sans TC',sans-serif;
+}
+.s3btn:hover{border-color:#667eea;background:#f0f4ff}
+.s3btn.sel{border-color:#667eea;background:linear-gradient(135deg,#f0f4ff,#faf0ff);
+  box-shadow:0 2px 8px rgba(102,126,234,.2)}
+.s3btn.sel.te{border-color:#2980B9;background:#ebf5fb}
+.s3btn.sel.tg{border-color:#27AE60;background:#eafaf1}
+.s3btn.sel.tm{border-color:#E74C3C;background:#fdedec}
+.s3btn.sel.tt{border-color:#F39C12;background:#fef9e7}
+.s3emoji{font-size:1.15rem;display:block;line-height:1.3}
+.s3name{font-size:.54rem;font-weight:800;color:#718096;line-height:1.2;margin-top:1px}
+.s3btn.sel .s3name{color:#667eea}
+.s3btn.sel.te .s3name{color:#1a6db5}
+.s3btn.sel.tg .s3name{color:#1a7a44}
+.s3btn.sel.tm .s3name{color:#b02a1b}
+.s3btn.sel.tt .s3name{color:#b8720c}
+
+/* ── 密碼驗證 overlay ── */
+.pw-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.62);
+  display:flex;align-items:center;justify-content:center;z-index:9999;
+  opacity:0;pointer-events:none;transition:opacity .22s;
+}
+.pw-overlay.show{opacity:1;pointer-events:all}
+.pw-box{
+  background:white;border-radius:22px;padding:28px 24px 22px;
+  max-width:380px;width:93%;text-align:center;
+  box-shadow:0 24px 60px rgba(0,0,0,.32);
+  animation:popIn .3s cubic-bezier(.175,.885,.32,1.275) both;
+}
+.pw-icon{font-size:2.6rem;margin-bottom:6px}
+.pw-title{font-size:1.05rem;font-weight:900;color:#2d3748;margin-bottom:4px}
+.pw-sub{font-size:.78rem;color:#718096;margin-bottom:14px;line-height:1.5}
+.pw-row{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;text-align:left}
+.pw-label{font-size:.72rem;font-weight:800;color:#4a5568;margin-bottom:2px}
+.pw-input{
+  width:100%;border:2px solid #e2e8f0;border-radius:10px;
+  padding:9px 14px;font-size:1.1rem;font-weight:800;
+  text-align:center;letter-spacing:5px;font-family:monospace;
+  outline:none;transition:border-color .18s;
+  -webkit-text-security:disc;
+}
+.pw-input:focus{border-color:#667eea}
+.pw-input.err{border-color:#e74c3c;animation:pwShake .3s ease}
+@keyframes pwShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.pw-custom-note{
+  font-size:.71rem;color:#a0aec0;background:#f8faff;border-radius:8px;
+  padding:6px 10px;margin-bottom:10px;line-height:1.5;text-align:left;
+  border:1px solid #e2e8f0;
+}
+.pw-err-msg{font-size:.76rem;color:#e74c3c;font-weight:700;min-height:1.1em;margin-bottom:6px;text-align:center}
+.pw-btns{display:flex;gap:8px}
+.pw-btn-cancel{flex:1;padding:10px;border:2px solid #e2e8f0;border-radius:10px;
+  background:white;color:#718096;font-weight:800;font-size:.9rem;cursor:pointer;
+  font-family:'Noto Sans TC',sans-serif;}
+.pw-btn-setup{flex:1;padding:10px;border:none;border-radius:10px;
+  background:#667eea;color:white;font-weight:900;font-size:.9rem;cursor:pointer;
+  font-family:'Noto Sans TC',sans-serif;}
+.pw-btn-del{flex:1;padding:10px;border:none;border-radius:10px;
+  background:#e74c3c;color:white;font-weight:900;font-size:.9rem;cursor:pointer;
+  font-family:'Noto Sans TC',sans-serif;}
 
 /* ── TURN ANNOUNCE ── */
 .turn-announce{
@@ -486,44 +588,53 @@ body.landscape .bldg-name{font-size:.44rem;max-width:44px}
 .privacy-note{font-size:.66rem;color:#a0aec0;text-align:center;margin-top:8px;font-style:italic}
 
 /* ── LEADERBOARD ── */
-#screen-lb .glass{max-width:820px}
+#screen-lb .glass{max-width:820px;overflow:hidden}
 .lb-header{background:linear-gradient(135deg,#f7971e,#ffd200,#f7971e);padding:28px 28px 22px;text-align:center;position:relative;overflow:hidden}
 .lb-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.04) 10px,rgba(255,255,255,.04) 20px)}
 .lb-crown{font-size:3.5rem;display:block;margin-bottom:6px;animation:crownBounce 1s ease both}
 @keyframes crownBounce{0%{transform:translateY(-20px);opacity:0}60%{transform:translateY(6px)}100%{transform:translateY(0);opacity:1}}
 .lb-title{font-size:1.8rem;font-weight:900;color:#2d3748;margin-bottom:3px}
 .lb-sub{color:#5d4e37;font-size:.88rem;font-weight:600}
-.lb-body{padding:20px 22px 24px}
-.lb-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
-.lb-count{font-size:.78rem;font-weight:800;color:#718096}
-.lb-nav{display:flex;gap:7px}
-.lb-nav-btn{padding:6px 14px;border-radius:50px;font-size:.8rem;font-weight:800;cursor:pointer;border:2px solid #667eea;color:#667eea;background:white;font-family:'Noto Sans TC',sans-serif;transition:all .2s}
+.lb-body{padding:16px 14px 20px}
+.lb-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px}
+.lb-count{font-size:.75rem;font-weight:800;color:#718096}
+.lb-nav{display:flex;gap:5px;flex-wrap:wrap}
+.lb-nav-btn{padding:5px 10px;border-radius:50px;font-size:.72rem;font-weight:800;cursor:pointer;border:2px solid #667eea;color:#667eea;background:white;font-family:'Noto Sans TC',sans-serif;transition:all .2s;white-space:nowrap}
 .lb-nav-btn:hover,.lb-nav-btn.active{background:#667eea;color:white}
-.lb-table{width:100%;border-collapse:separate;border-spacing:0 5px}
-.lb-table th{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#a0aec0;padding:0 8px 7px;text-align:left}
+.lb-table{width:100%;border-collapse:separate;border-spacing:0 5px;table-layout:fixed}
+.lb-table th{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#a0aec0;padding:0 5px 7px;text-align:left}
 .lb-table th:last-child,.lb-table td:last-child{text-align:right}
+/* 固定欄寬：名次28px、姓名欄 auto、右側資料欄 88px */
+.lb-table colgroup col:nth-child(1){width:36px}
+.lb-table colgroup col:nth-child(2){width:auto}
+.lb-table colgroup col:nth-child(3){width:88px}
 .lb-row{background:white;border-radius:13px;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:transform .2s}
 .lb-row:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.1)}
 .lb-row.top1{background:linear-gradient(135deg,#fff9e6,#fff3cc);box-shadow:0 4px 16px rgba(255,200,0,.2)}
 .lb-row.top2{background:linear-gradient(135deg,#f5f5f5,#e8e8e8)}
 .lb-row.top3{background:linear-gradient(135deg,#fff0eb,#ffe5d5)}
-.lb-row td{padding:11px 8px;font-size:.84rem;font-weight:700;color:#2d3748;vertical-align:middle}
-.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:.82rem;font-weight:900}
+.lb-row td{padding:9px 5px;font-size:.82rem;font-weight:700;color:#2d3748;vertical-align:middle}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:.78rem;font-weight:900}
 .rank-1{background:linear-gradient(135deg,#FFD700,#FFA000);color:white}
 .rank-2{background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:white}
 .rank-3{background:linear-gradient(135deg,#cd7f32,#a0522d);color:white}
-.rank-n{background:#f0f4ff;color:#667eea;font-size:.72rem}
-.lb-name{font-weight:900;font-size:.88rem}
-.lb-school{font-size:.72rem;color:#718096;font-weight:600;margin-top:1px}
-.lb-dept-tag{display:inline-block;font-size:.66rem;font-weight:800;padding:2px 7px;border-radius:50px;background:#f0f4ff;color:#667eea;border:1px solid #c3d0ff}
-.time-val{font-size:.95rem;font-weight:900;color:#667eea}
-.moves-val{font-size:.78rem;color:#a0aec0;font-weight:700}
+.rank-n{background:#f0f4ff;color:#667eea;font-size:.68rem}
+.lb-name{font-weight:900;font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
+.lb-school{font-size:.68rem;color:#718096;font-weight:600;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
+.lb-dept-tag{display:inline-block;font-size:.62rem;font-weight:800;padding:1px 6px;border-radius:50px;background:#f0f4ff;color:#667eea;border:1px solid #c3d0ff}
+/* 右欄：分數+時間+翻牌 堆疊顯示 */
+.lb-stats-cell{text-align:right;line-height:1.4}
+.lb-stat-score{font-size:1.1rem;font-weight:900;color:#f39c12}
+.lb-stat-score.hi{color:#e74c3c}
+.lb-stat-time{font-size:.82rem;font-weight:900;color:#667eea}
+.lb-stat-moves{font-size:.65rem;color:#a0aec0;font-weight:700}
+.lb-email{font-size:.62rem;color:#b0b8c8;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
 .lb-empty{text-align:center;padding:36px 20px;color:#a0aec0}
 .lb-empty-icon{font-size:2.8rem;display:block;margin-bottom:8px}
-.lb-footer{display:flex;gap:10px;flex-wrap:wrap;padding:0 22px 22px}
-.btn-lb-back{flex:1;min-width:110px;background:white;color:#667eea;border:2.5px solid #667eea;border-radius:13px;padding:12px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .2s;text-align:center}
+.lb-footer{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px 18px}
+.btn-lb-back{flex:1;min-width:80px;background:white;color:#667eea;border:2.5px solid #667eea;border-radius:13px;padding:10px 8px;font-size:.82rem;font-weight:900;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .2s;text-align:center}
 .btn-lb-back:hover{background:#f0f4ff}
-.btn-lb-play{flex:2;min-width:150px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:13px;padding:12px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:'Noto Sans TC',sans-serif;box-shadow:0 5px 18px rgba(102,126,234,.4)}
+.btn-lb-play{flex:2;min-width:120px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:13px;padding:10px;font-size:.82rem;font-weight:900;cursor:pointer;font-family:'Noto Sans TC',sans-serif;box-shadow:0 5px 18px rgba(102,126,234,.4)}
 .btn-lb-play:hover{transform:translateY(-2px)}
 /* 刪除全部按鈕 */
 .btn-lb-clearall{
@@ -827,9 +938,13 @@ body.landscape .bldg-name{font-size:.44rem;max-width:44px}
         </div>
       </div>
 
+      <!-- STEP 3: 各玩家選擇志願系別 -->
+      <div class="step-label" id="step3-label">Step 3 · 選擇你的志願系別（配對到可得 3 倍分數！）</div>
+      <div id="step3-section" class="step3-section"></div>
+
       <div class="info-pills">
         <div class="info-pill">🎮 12組配對 · 找出相同圖案</div>
-        <div class="info-pill">🏗️ 解鎖即建造校園</div>
+        <div class="info-pill">⭐ 志願系別配對 = 3倍分數！</div>
         <div class="info-pill">🏆 單人模式計入排行榜</div>
         <div class="info-pill">📍 新北板橋 · 捷運2分鐘</div>
       </div>
@@ -848,6 +963,7 @@ body.landscape .bldg-name{font-size:.44rem;max-width:44px}
       <div class="game-logo" id="game-logo">🏫 亞東科大探索地圖</div>
       <div class="topbar-right">
         <div class="stat-chip"><span>解鎖 </span><span id="s-pairs">0</span><span>/12</span></div>
+        <div class="stat-chip" id="s-score-wrap" style="color:#f39c12;font-weight:900">⭐ <span id="s-score">0</span></div>
         <div class="stat-chip" id="s-moves-wrap"><span>翻牌 </span><span id="s-moves">0</span></div>
         <div class="stat-chip" id="s-timer">⏱ 00:00</div>
         <button class="sound-btn" id="sound-btn" onclick="toggleSound()">🔊</button>
@@ -908,8 +1024,9 @@ body.landscape .bldg-name{font-size:.44rem;max-width:44px}
       <div class="score-summary">
         <div class="score-item"><div class="score-val" style="color:#667eea" id="res-moves">-</div><div class="score-lab">翻牌次數</div></div>
         <div class="score-item"><div class="score-val" style="color:#27ae60" id="res-time">-</div><div class="score-lab">完成時間</div></div>
+        <div class="score-item"><div class="score-val" style="color:#f39c12;font-size:2rem" id="res-score">-</div><div class="score-lab">⭐ 對戰分數</div></div>
         <div class="score-item"><div class="score-val" style="color:#e74c3c">12</div><div class="score-lab">系所解鎖</div></div>
-        <div class="score-item"><div class="score-val" style="color:#f39c12" id="res-rank-preview">-</div><div class="score-lab">目前排名</div></div>
+        <div class="score-item"><div class="score-val" style="color:#764ba2" id="res-rank-preview">-</div><div class="score-lab">目前排名</div></div>
       </div>
       <div class="reg-title">📋 登錄資料，上榜英雄榜</div>
       <div class="form-grid">
@@ -937,16 +1054,17 @@ body.landscape .bldg-name{font-size:.44rem;max-width:44px}
       <div class="lb-controls">
         <div class="lb-count" id="lb-count">共 0 位挑戰者</div>
         <div class="lb-nav">
-          <button class="lb-nav-btn active" onclick="sortLb('time')">⏱ 依時間</button>
+          <button class="lb-nav-btn active" onclick="sortLb('score')">⭐ 依分數</button>
+          <button class="lb-nav-btn" onclick="sortLb('time')">⏱ 依時間</button>
           <button class="lb-nav-btn" onclick="sortLb('moves')">🎯 依翻牌數</button>
         </div>
       </div>
       <table class="lb-table">
+        <colgroup><col><col><col></colgroup>
         <thead><tr>
-          <th style="width:40px">名次</th>
-          <th>姓名 / 學校 / 科別</th>
-          <th>完成時間</th>
-          <th>翻牌次數</th>
+          <th>名次</th>
+          <th>姓名 / 學校</th>
+          <th style="text-align:right">⭐分數<br><span style="color:#667eea">時間／翻牌</span></th>
         </tr></thead>
         <tbody id="lb-tbody"></tbody>
       </table>
@@ -983,6 +1101,54 @@ body.landscape .bldg-name{font-size:.44rem;max-width:44px}
       <button class="del-confirm-cancel" onclick="closeDlConfirm()">取消</button>
       <button class="del-confirm-ok" onclick="execDlConfirm()">確定刪除</button>
     </div>
+  </div>
+</div>
+
+<!-- 管理者密碼驗證 overlay -->
+<div class="pw-overlay" id="pw-overlay">
+  <div class="pw-box" id="pw-box">
+
+    <!-- 模式 A：輸入密碼清空資料 -->
+    <div id="pw-step-verify">
+      <div class="pw-icon">🔐</div>
+      <div class="pw-title">管理者驗證</div>
+      <div class="pw-sub" id="pw-sub-text">請輸入管理者密碼（4位數字）以清空排行榜資料。</div>
+      <div class="pw-row">
+        <div class="pw-label">管理者密碼</div>
+        <input class="pw-input" id="pw-single" type="password" inputmode="numeric" maxlength="4" placeholder="••••" oninput="this.classList.remove('err')" onkeydown="if(event.key==='Enter')verifyAndClear()">
+      </div>
+      <div class="pw-err-msg" id="pw-err"></div>
+      <div class="pw-btns">
+        <button class="pw-btn-cancel" onclick="closePwOverlay()">取消</button>
+        <button class="pw-btn-setup" onclick="switchToPwSetup()">⚙ 設定自訂密碼</button>
+        <button class="pw-btn-del" onclick="verifyAndClear()">驗證並清空</button>
+      </div>
+    </div>
+
+    <!-- 模式 B：設定 / 修改自訂密碼（需先驗證舊密碼或永久密碼） -->
+    <div id="pw-step-setup" style="display:none">
+      <div class="pw-icon">🔑</div>
+      <div class="pw-title" id="pw-setup-title">設定自訂密碼</div>
+      <div class="pw-sub" id="pw-setup-sub">請先輸入現有密碼以驗證身份，再設定新自訂密碼。</div>
+      <div class="pw-row" id="pw-old-row">
+        <div class="pw-label">現有密碼（永久密碼或舊自訂密碼）</div>
+        <input class="pw-input" id="pw-old" type="password" inputmode="numeric" maxlength="4" placeholder="••••" oninput="this.classList.remove('err')">
+      </div>
+      <div class="pw-row">
+        <div class="pw-label">新自訂密碼（4位數字）</div>
+        <input class="pw-input" id="pw-new1" type="password" inputmode="numeric" maxlength="4" placeholder="••••" oninput="this.classList.remove('err')">
+      </div>
+      <div class="pw-row">
+        <div class="pw-label">再輸入一次確認</div>
+        <input class="pw-input" id="pw-new2" type="password" inputmode="numeric" maxlength="4" placeholder="••••" oninput="this.classList.remove('err')">
+      </div>
+      <div class="pw-err-msg" id="pw-setup-err"></div>
+      <div class="pw-btns">
+        <button class="pw-btn-cancel" onclick="showPwVerify()">← 返回</button>
+        <button class="pw-btn-setup" onclick="saveCustomPw()">確認儲存</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1157,10 +1323,11 @@ function toggleSound(){
 ══════════════════════════════════════ */
 let selectedCollege=null;   // 'e'|'g'|'m'|'t'
 let gameMode=1;             // 1–4 players
+let playerDepts=[];         // [deptId, deptId, ...] 每位玩家的志願系別 id
 let flipped=[],matched=new Set();
 let moves=0,canFlip=true,timerInt=null,elapsed=0;
 let popupQueue=[],showingPopup=false,gameComplete=false;
-let lbSortMode='time';
+let lbSortMode='score';
 
 // Multi-player state
 let mpNumPlayers=1;
@@ -1187,16 +1354,56 @@ function pickCollege(el){
   document.querySelectorAll('.cp-card').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
   selectedCollege=el.dataset.college;
+  renderStep3();
   checkCanStart();
 }
 function pickMode(el){
   document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
   gameMode=parseInt(el.dataset.mode);
+  playerDepts=Array(gameMode).fill(null);
+  renderStep3();
+  checkCanStart();
+}
+
+// 產生 Step3 各玩家選系別介面
+function renderStep3(){
+  const sec=document.getElementById('step3-section');
+  if(!gameMode){sec.innerHTML='';return;}
+  let html='';
+  for(let p=0;p<gameMode;p++){
+    const cfg=PLAYER_CFG[p];
+    const label=gameMode===1
+      ? '👤 選擇你的志願系別（配對到得 3 倍分數！）'
+      : `${cfg.avatar} ${cfg.name}的志願系別`;
+    html+=`<div class="step3-player-block">
+      <div class="step3-player-label">${label}</div>
+      <div class="step3-dept-grid">`;
+    DEPTS.filter(d=>d.id<11).forEach(d=>{
+      const sel=(playerDepts[p]===d.id)?'sel t'+d.theme:'';
+      html+=`<div class="s3btn ${sel}" onclick="pickDept(${p},${d.id},this)">
+        <span class="s3emoji">${d.emoji}</span>
+        <div class="s3name">${d.name.replace('系','').replace('材料織品服裝','材料服裝').replace('行銷與流通管理','行銷流通').replace('工商業設計','工商設計').replace('工業管理','工管').replace('資訊管理','資管').replace('醫務管理','醫管')}</div>
+      </div>`;
+    });
+    html+='</div></div>';
+  }
+  sec.innerHTML=html;
+}
+function pickDept(playerIdx, deptId, el){
+  // 同一 player block 內先取消其他選取
+  const block=el.closest('.step3-player-block');
+  block.querySelectorAll('.s3btn').forEach(b=>{
+    b.classList.remove('sel','te','tg','tm','tt');
+  });
+  el.classList.add('sel','t'+DEPTS[deptId].theme);
+  playerDepts[playerIdx]=deptId;
   checkCanStart();
 }
 function checkCanStart(){
-  document.getElementById('btn-start').disabled=!(selectedCollege&&gameMode);
+  // 需要：已選學院 + 已選人數 + 每位玩家都選了志願系別
+  const allPicked=gameMode>0 && playerDepts.slice(0,gameMode).every(d=>d!==null);
+  document.getElementById('btn-start').disabled=!(selectedCollege && gameMode && allPicked);
 }
 
 /* ══════════════════════════════════════
@@ -1207,6 +1414,8 @@ function startGame(){
   mpCurrentPlayer=0;
   mpScores=Array(mpNumPlayers).fill(0);
   mpStreaks=Array(mpNumPlayers).fill(0);
+  // playerDepts 已在 pickDept 時設好，這裡確保長度正確
+  if(playerDepts.length!==mpNumPlayers) playerDepts=Array(mpNumPlayers).fill(null);
 
   // 先偵測版面方向，再切換畫面
   const isLandscape = window.innerWidth > window.innerHeight;
@@ -1254,6 +1463,7 @@ function buildBoard(){
   document.getElementById('prog-pct').textContent='0%';
   document.getElementById('s-pairs').textContent='0';
   document.getElementById('s-moves').textContent='0';
+  const sc=document.getElementById('s-score');if(sc)sc.textContent='0';
   updateTabs(0);
 
   let cards=[];
@@ -1353,22 +1563,35 @@ function onCardClick(el,data){
       updateProgress();
       updateTabs(matched.size);
       addBuilding(a.dept);
-      
+
+      // 計算倍數：配對到自己的志願系別 = 3倍
+      const myDept=playerDepts[owner];
+      const mult=(myDept!==null && a.deptId===myDept)?3:1;
+      const pts=mult;
+
       if(mpNumPlayers>1){
-        mpScores[mpCurrentPlayer]++;
-        mpStreaks[mpCurrentPlayer]++;
-        // reset other players' streaks
-        for(let i=0;i<mpNumPlayers;i++) if(i!==mpCurrentPlayer) mpStreaks[i]=0;
-        updateMpScore(mpCurrentPlayer);
-        scoreFlash(`${PLAYER_CFG[mpCurrentPlayer].avatar} +1 分！`);
+        mpScores[owner]+=pts;
+        mpStreaks[owner]++;
+        for(let i=0;i<mpNumPlayers;i++) if(i!==owner) mpStreaks[i]=0;
+        updateMpScore(owner);
+        if(mult===3){
+          scoreFlash(`${PLAYER_CFG[owner].avatar} 🌟 志願系別 ×3 = +3分！`,'triple');
+        } else {
+          scoreFlash(`${PLAYER_CFG[owner].avatar} +1 分！`);
+        }
         sfx.unlock();
         queuePopup(a.dept);
         flipped=[];
-        // match → same player continues (no turn change)
         if(matched.size===12){clearInterval(timerInt);gameComplete=true;}
-        // canFlip restored by popup queue
       } else {
-        scoreFlash('🎉 +1 解鎖！');
+        mpScores[0]+=pts;
+        const sc=document.getElementById('s-score');
+        if(sc) sc.textContent=mpScores[0];
+        if(mult===3){
+          scoreFlash('🌟 志願系別配對！×3 分！','triple');
+        } else {
+          scoreFlash('🎉 +1 解鎖！');
+        }
         sfx.unlock();
         queuePopup(a.dept);
         flipped=[];
@@ -1435,9 +1658,10 @@ function addBuilding(dept){
 /* ══════════════════════════════════════
    SCORE FLASH
 ══════════════════════════════════════ */
-function scoreFlash(msg){
+function scoreFlash(msg, cls=''){
   const el=document.createElement('div');
-  el.className='score-flash';el.textContent=msg;
+  el.className='score-flash'+(cls?' '+cls:'');
+  el.textContent=msg;
   document.body.appendChild(el);
   setTimeout(()=>el.remove(),920);
 }
@@ -1515,8 +1739,11 @@ function showSoloResult(){
   const s=String(elapsed%60).padStart(2,'0');
   document.getElementById('res-moves').textContent=moves;
   document.getElementById('res-time').textContent=`${m}:${s}`;
+  const myScore=mpScores[0]||0;
+  document.getElementById('res-score').textContent=myScore+' 分';
   const lb=loadLb();
-  const rank=lb.filter(r=>r.elapsed<elapsed).length+1;
+  // 排名依分數由高到低，同分再比時間
+  const rank=lb.filter(r=>(r.score||0)>myScore || ((r.score||0)===myScore && r.elapsed<elapsed)).length+1;
   document.getElementById('res-rank-preview').textContent='#'+rank;
   ['f-name','f-school','f-dept','f-email'].forEach(id=>{
     document.getElementById(id).value='';
@@ -1612,9 +1839,10 @@ function submitScore(){
   if(!emailOk){document.getElementById('f-email').classList.add('error');document.getElementById('e-email').textContent='請輸入有效的電子郵件';valid=false;}
   else{document.getElementById('f-email').classList.remove('error');document.getElementById('e-email').textContent='';}
   if(!valid)return;
+  const myScore=mpScores[0]||0;
   const lb=loadLb();
-  lb.push({name,school,dept,email,elapsed,moves,ts:Date.now(),_id:Date.now()+Math.random()});
-  lb.sort((a,b)=>a.elapsed-b.elapsed||a.moves-b.moves);
+  lb.push({name,school,dept,email,elapsed,moves,score:myScore,ts:Date.now(),_id:Date.now()+Math.random()});
+  lb.sort((a,b)=>(b.score||0)-(a.score||0)||(a.elapsed-b.elapsed)||(a.moves-b.moves));
   if(lb.length>200)lb.length=200;
   saveLb(lb);
   document.getElementById('btn-submit').disabled=true;
@@ -1649,19 +1877,113 @@ function execDlConfirm(){
   closeDlConfirm();
 }
 
-// 清空全部
+// 清空全部 → 先驗證密碼
 function confirmClearAll(){
-  const lb = loadLb();
-  if(lb.length===0){ alert('排行榜目前沒有任何資料。'); return; }
+  const lb=loadLb();
+  if(lb.length===0){alert('排行榜目前沒有任何資料。');return;}
+  openPwOverlay();
+}
+
+/* ── 密碼管理 ────────────────────────── */
+const _PW_F=(()=>{const a=[49,51,56,48];return()=>a.map(c=>String.fromCharCode(c)).join('');})();
+const PW_CUSTOM_KEY='aeust_admin_pw';
+
+function loadCustomPw(){return localStorage.getItem(PW_CUSTOM_KEY)||null;}
+function _savePw(pw){localStorage.setItem(PW_CUSTOM_KEY,pw);}
+
+// 驗證輸入是否為合法管理者密碼（永久碼 OR 自訂碼）
+function _isValidPw(input){
+  const custom=loadCustomPw();
+  return input===_PW_F() || (custom && input===custom);
+}
+
+function openPwOverlay(){
+  showPwVerify();
+  document.getElementById('pw-overlay').classList.add('show');
+}
+function closePwOverlay(){
+  document.getElementById('pw-overlay').classList.remove('show');
+  ['pw-single','pw-old','pw-new1','pw-new2'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.value='';el.classList.remove('err');}
+  });
+  document.getElementById('pw-err').textContent='';
+  document.getElementById('pw-setup-err').textContent='';
+}
+function showPwVerify(){
+  document.getElementById('pw-step-verify').style.display='';
+  document.getElementById('pw-step-setup').style.display='none';
+  const hasCustom=!!loadCustomPw();
+  document.getElementById('pw-sub-text').textContent=hasCustom
+    ?'請輸入管理者密碼（自訂密碼）以清空排行榜資料。'
+    :'請輸入管理者密碼（4位數字）以清空排行榜資料。';
+  document.getElementById('pw-err').textContent='';
+  const inp=document.getElementById('pw-single');
+  if(inp){inp.value='';inp.classList.remove('err');}
+  setTimeout(()=>{ const el=document.getElementById('pw-single'); if(el)el.focus(); },100);
+}
+function switchToPwSetup(){
+  // 進入「設定/修改自訂密碼」模式
+  const hasCustom=!!loadCustomPw();
+  document.getElementById('pw-setup-title').textContent=hasCustom?'修改自訂密碼':'設定自訂密碼';
+  document.getElementById('pw-setup-sub').textContent=hasCustom
+    ?'請先輸入現有密碼（永久密碼或舊自訂密碼）驗證身份，再輸入新密碼。'
+    :'請直接輸入要設定的新自訂密碼。';
+  // 若沒有自訂密碼，隱藏「舊密碼」欄（直接用永久密碼不需要顯示）
+  // 為了不洩漏永久密碼，不管有無自訂密碼，舊密碼欄都顯示
+  document.getElementById('pw-old-row').style.display='';
+  document.getElementById('pw-step-verify').style.display='none';
+  document.getElementById('pw-step-setup').style.display='';
+  ['pw-old','pw-new1','pw-new2'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.value='';el.classList.remove('err');}
+  });
+  document.getElementById('pw-setup-err').textContent='';
+}
+function saveCustomPw(){
+  const old=document.getElementById('pw-old').value.trim();
+  const v1=document.getElementById('pw-new1').value.trim();
+  const v2=document.getElementById('pw-new2').value.trim();
+  const err=document.getElementById('pw-setup-err');
+  // 驗證舊密碼
+  if(!_isValidPw(old)){
+    err.textContent='現有密碼輸入錯誤，請重新輸入。';
+    document.getElementById('pw-old').classList.add('err');return;
+  }
+  if(!/^\d{4}$/.test(v1)){
+    err.textContent='新密碼請輸入4位數字。';
+    document.getElementById('pw-new1').classList.add('err');return;
+  }
+  if(v1!==v2){
+    err.textContent='兩次輸入不相同，請重新輸入。';
+    document.getElementById('pw-new2').classList.add('err');return;
+  }
+  _savePw(v1);
+  err.style.color='#27ae60';
+  err.textContent='✅ 自訂密碼已儲存！';
+  setTimeout(()=>{err.style.color='';showPwVerify();},1300);
+}
+function verifyAndClear(){
+  const input=document.getElementById('pw-single').value.trim();
+  const err=document.getElementById('pw-err');
+  if(!input){err.textContent='請輸入密碼。';return;}
+  if(!_isValidPw(input)){
+    err.textContent='密碼錯誤，請重新輸入。';
+    document.getElementById('pw-single').classList.add('err');
+    document.getElementById('pw-single').value='';
+    return;
+  }
+  // 驗證通過
+  closePwOverlay();
+  const lb=loadLb();
   openDlConfirm(
-    '⚠️',
-    '清空全部排行榜資料？',
+    '⚠️','清空全部排行榜資料？',
     `即將永久刪除全部 ${lb.length} 筆成績，此操作無法復原。`,
-    ()=>{ saveLb([]); renderLb();
-          // 清空後收合危險區
-          document.getElementById('lb-danger-panel').classList.remove('open');
-          document.getElementById('lb-danger-toggle').textContent='⚙ 管理資料';
-        }
+    ()=>{
+      saveLb([]);renderLb();
+      document.getElementById('lb-danger-panel').classList.remove('open');
+      document.getElementById('lb-danger-toggle').textContent='⚙ 管理資料';
+    }
   );
 }
 
@@ -1731,8 +2053,8 @@ function exportExcel(){
     return;
   }
 
-  // Sort by time asc
-  const rows=[...lb].sort((a,b)=>a.elapsed-b.elapsed||a.moves-b.moves);
+  // Sort by score desc
+  const rows=[...lb].sort((a,b)=>(b.score||0)-(a.score||0)||a.elapsed-b.elapsed||a.moves-b.moves);
 
   // Build worksheet data
   const wsData=[];
@@ -1744,7 +2066,7 @@ function exportExcel(){
   wsData.push([]);  // blank row
 
   // Header
-  wsData.push(['名次','姓名','就讀高中職','科別','電子郵件','完成時間','翻牌次數','對戰日期','對戰時間']);
+  wsData.push(['名次','姓名','就讀高中職','科別','電子郵件','對戰分數','完成時間','翻牌次數','對戰日期','對戰時間']);
 
   // Data rows
   rows.forEach((r,i)=>{
@@ -1757,6 +2079,7 @@ function exportExcel(){
       r.school,
       r.dept,
       r.email,
+      r.score!=null?r.score:'-',
       fmtTime(r.elapsed),
       r.moves,
       dateStr,
@@ -1768,25 +2091,27 @@ function exportExcel(){
   wsData.push([]);
   wsData.push(['統計資訊']);
   const times=rows.map(r=>r.elapsed);
-  const minT=Math.min(...times), maxT=Math.max(...times), avgT=Math.round(times.reduce((a,b)=>a+b,0)/times.length);
+  const allScores=rows.map(r=>r.score||0);
   const allMoves=rows.map(r=>r.moves);
+  const minT=Math.min(...times), maxT=Math.max(...times), avgT=Math.round(times.reduce((a,b)=>a+b,0)/times.length);
+  wsData.push(['最高分數',Math.max(...allScores)+'分','最低分數',Math.min(...allScores)+'分','平均分數',(allScores.reduce((a,b)=>a+b,0)/allScores.length).toFixed(1)+'分']);
   wsData.push(['最快完成',fmtTime(minT),'最慢完成',fmtTime(maxT),'平均用時',fmtTime(avgT)]);
   wsData.push(['最少翻牌',Math.min(...allMoves)+'次','最多翻牌',Math.max(...allMoves)+'次','平均翻牌',Math.round(allMoves.reduce((a,b)=>a+b,0)/allMoves.length)+'次']);
 
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet(wsData);
 
-  // Column widths
+  // Column widths (10 cols now)
   ws['!cols']=[
     {wch:6},{wch:12},{wch:20},{wch:14},{wch:28},
-    {wch:10},{wch:10},{wch:14},{wch:12}
+    {wch:10},{wch:10},{wch:10},{wch:14},{wch:12}
   ];
 
   // Merge title cell A1
   ws['!merges']=[
-    {s:{r:0,c:0},e:{r:0,c:8}},
-    {s:{r:1,c:0},e:{r:1,c:8}},
-    {s:{r:2,c:0},e:{r:2,c:8}},
+    {s:{r:0,c:0},e:{r:0,c:9}},
+    {s:{r:1,c:0},e:{r:1,c:9}},
+    {s:{r:2,c:0},e:{r:2,c:9}},
   ];
 
   XLSX.utils.book_append_sheet(wb,ws,'單人挑戰排行榜');
@@ -1799,14 +2124,19 @@ function exportExcel(){
 function showLb(){showScreen('screen-lb');renderLb();}
 function sortLb(mode){
   lbSortMode=mode;
-  document.querySelectorAll('.lb-nav-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&mode==='time')||(i===1&&mode==='moves')));
+  document.querySelectorAll('.lb-nav-btn').forEach(b=>{
+    b.classList.toggle('active',b.textContent.includes(
+      mode==='score'?'分數':mode==='time'?'時間':'翻牌'
+    ));
+  });
   renderLb();
 }
 function renderLb(){
   const lb=loadLb();
   let rows=[...lb];
-  if(lbSortMode==='moves') rows.sort((a,b)=>a.moves-b.moves||a.elapsed-b.elapsed);
-  else rows.sort((a,b)=>a.elapsed-b.elapsed||a.moves-b.moves);
+  if(lbSortMode==='moves')      rows.sort((a,b)=>a.moves-b.moves||(b.score||0)-(a.score||0)||a.elapsed-b.elapsed);
+  else if(lbSortMode==='time')  rows.sort((a,b)=>a.elapsed-b.elapsed||(b.score||0)-(a.score||0)||a.moves-b.moves);
+  else /* score */               rows.sort((a,b)=>(b.score||0)-(a.score||0)||a.elapsed-b.elapsed||a.moves-b.moves);
   document.getElementById('lb-count').textContent=`共 ${rows.length} 位挑戰者`;
   const tbody=document.getElementById('lb-tbody');
   const empty=document.getElementById('lb-empty');
@@ -1817,15 +2147,20 @@ function renderLb(){
   tbody.innerHTML=rows.map((r,i)=>{
     const rank=i+1;
     const rb=rank<=3?`<div class="rank-badge rank-${rank}">${medals[rank-1]}</div>`:`<div class="rank-badge rank-n">#${rank}</div>`;
+    const sc=r.score!=null?r.score:'-';
+    const scCls=(typeof r.score==='number'&&r.score>=3)?'lb-stat-score hi':'lb-stat-score';
     return`<tr class="lb-row ${rank<=3?rowCls[rank-1]:''}">
-      <td>${rb}</td>
+      <td style="width:36px">${rb}</td>
       <td>
         <div class="lb-name">${maskName(r.name)}</div>
         <div class="lb-school">${r.school} · <span class="lb-dept-tag">${r.dept}</span></div>
-        <div style="font-size:.66rem;color:#b0b8c8;margin-top:1px">${maskEmail(r.email)}</div>
+        <div class="lb-email">${maskEmail(r.email)}</div>
       </td>
-      <td><div class="time-val">${fmtTime(r.elapsed)}</div></td>
-      <td><div class="moves-val">${r.moves} 次</div></td>
+      <td class="lb-stats-cell">
+        <div class="${scCls}">${sc}<span style="font-size:.6rem;font-weight:700;margin-left:1px">分</span></div>
+        <div class="lb-stat-time">${fmtTime(r.elapsed)}</div>
+        <div class="lb-stat-moves">${r.moves} 次</div>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -1993,6 +2328,8 @@ function goPlayAgain(){
   document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
   document.getElementById('btn-start').disabled=true;
   selectedCollege=null;gameMode=1;
+  playerDepts=[];
+  document.getElementById('step3-section').innerHTML='';
   showScreen('screen-welcome');
 }
 function showScreen(id){
